@@ -1,0 +1,12 @@
+dependencies {
+    implementation project(':module-repository')
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.7'
+    implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
+
+    implementation 'org.springframework:spring-aspects:6.1.4'
+    implementation "org.mapstruct:mapstruct:$mapstructVersion"
+    annotationProcessor "org.mapstruct:mapstruct-processor:$mapstructVersion"
+
+
+}

@@ -1,0 +1,62 @@
+plugins {
+    id 'java-base'
+    id 'application'
+    id 'org.springframework.boot' version '2.7.7'
+    id 'jacoco'
+    id 'war'
+}
+
+wrapper {
+    gradleVersion = gradlewVersion
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'jacoco'
+    apply plugin: 'war'
+    group = 'com.mjc.school'
+
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+
+    ext {
+        springVersion = "2.7.7"
+    }
+
+    dependencies {
+        implementation "org.springframework.boot:spring-boot-starter-web:$springVersion"
+        implementation "org.springframework.boot:spring-boot-starter-hateoas:$springVersion"
+        testImplementation "com.h2database:h2:2.2.224"
+        implementation "org.springframework.boot:spring-boot-starter-data-jpa:$springVersion"
+        implementation "org.springframework.boot:spring-boot-starter-security:$springVersion"
+        implementation "org.springframework.boot:spring-boot-starter-oauth2-client:$springVersion"
+        implementation "org.sonarsource.scanner.maven:sonar-maven-plugin:3.11.0.3922"
+        implementation "javax.xml.bind:jaxb-api:2.3.1"
+        implementation "io.jsonwebtoken:jjwt-api:0.12.5"
+        runtimeOnly "io.jsonwebtoken:jjwt-impl:0.12.5"
+        runtimeOnly "io.jsonwebtoken:jjwt-jackson:0.12.5"
+    }
+    test {
+        useJUnitPlatform()
+        finalizedBy jacocoTestReport
+    }
+    jacocoTestReport {
+        dependsOn test
+        reports {
+            xml.required = true
+        }
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+springBoot {
+    mainClass = 'com.mjc.school.Main'
+}
