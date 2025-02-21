@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-import static com.mjc.school.service.exceptions.ExceptionErrorCodes.*;
+import static com.mjc.school.service.exceptions.ExceptionErrorCodes.API_VERSION_NOT_SUPPORTED;
+import static com.mjc.school.service.exceptions.ExceptionErrorCodes.RESOURCE_NOT_FOUND;
+import static com.mjc.school.service.exceptions.ExceptionErrorCodes.VALIDATION_EXCEPTION;
 
 @ControllerAdvice
 public class ApiExceptionHandler {

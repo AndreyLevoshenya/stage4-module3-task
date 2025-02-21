@@ -1,13 +1,13 @@
 plugins {
-    id 'org.springframework.boot' version '2.7.7'
+    id 'org.springframework.boot' version "${springBootVersion}"
 }
 
 dependencies {
     implementation project(':module-service')
 
-    implementation group: 'io.springfox', name: 'springfox-swagger2', version: '3.0.0'
-    implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '3.0.0'
-    implementation 'io.springfox:springfox-boot-starter:3.0.0'
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.boot:spring-boot-starter-security"
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
     implementation 'com.thegoate:restassured:0.15.17.202305061925'
 }

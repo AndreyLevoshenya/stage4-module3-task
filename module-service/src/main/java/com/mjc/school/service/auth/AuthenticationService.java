@@ -1,4 +1,4 @@
-package com.mjc.school.service.implementation;
+package com.mjc.school.service.auth;
 
 import com.mjc.school.repository.UserRepository;
 import com.mjc.school.repository.model.Role;
@@ -6,7 +6,7 @@ import com.mjc.school.repository.model.User;
 import com.mjc.school.service.dto.AuthenticationRequest;
 import com.mjc.school.service.dto.AuthenticationResponse;
 import com.mjc.school.service.dto.RegisterRequest;
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthenticationService {
+    public static final String USER_NOT_FOUND = "User not found";
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -38,7 +40,7 @@ public class AuthenticationService {
                 request.getUsername(),
                 passwordEncoder.encode(request.getPassword()),
                 Role.USER);
-        userRepository.create(user);
+        userRepository.save(user);
         var jwtToken = jwtService.generateToken(user);
         return new AuthenticationResponse(jwtToken);
     }
@@ -46,7 +48,7 @@ public class AuthenticationService {
     @Transactional
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-        var user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        var user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND));
         var jwtToken = jwtService.generateToken(user);
         return new AuthenticationResponse(jwtToken);
     }

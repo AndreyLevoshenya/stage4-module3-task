@@ -1,7 +1,7 @@
 plugins {
     id 'java-base'
     id 'application'
-    id 'org.springframework.boot' version '2.7.7'
+    id 'org.springframework.boot' version "${springBootVersion}"
     id 'jacoco'
     id 'war'
 }
@@ -24,22 +24,15 @@ subprojects {
         gradlePluginPortal()
     }
 
-    ext {
-        springVersion = "2.7.7"
-    }
-
     dependencies {
-        implementation "org.springframework.boot:spring-boot-starter-web:$springVersion"
-        implementation "org.springframework.boot:spring-boot-starter-hateoas:$springVersion"
-        testImplementation "com.h2database:h2:2.2.224"
-        implementation "org.springframework.boot:spring-boot-starter-data-jpa:$springVersion"
-        implementation "org.springframework.boot:spring-boot-starter-security:$springVersion"
-        implementation "org.springframework.boot:spring-boot-starter-oauth2-client:$springVersion"
-        implementation "org.sonarsource.scanner.maven:sonar-maven-plugin:3.11.0.3922"
+        implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+        implementation "org.springframework.boot:spring-boot-starter"
+        implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+        implementation "org.springframework.boot:spring-boot-starter-hateoas"
+        implementation "org.springframework.boot:spring-boot-starter-oauth2-client"
+        compileOnly 'org.sonarsource.sonarqube:sonar-plugin-api:9.3.0.51899'
         implementation "javax.xml.bind:jaxb-api:2.3.1"
-        implementation "io.jsonwebtoken:jjwt-api:0.12.5"
-        runtimeOnly "io.jsonwebtoken:jjwt-impl:0.12.5"
-        runtimeOnly "io.jsonwebtoken:jjwt-jackson:0.12.5"
+
     }
     test {
         useJUnitPlatform()

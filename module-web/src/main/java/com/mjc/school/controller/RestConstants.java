@@ -9,5 +9,4 @@ public class RestConstants {
     public static final String COMMENTS_V1_API_PATH = BASE_V1_API_PATH + "/comments";
     public static final String AUTHENTICATION_V1_API_PATH = BASE_V1_API_PATH + "/auth";
 
-    private RestConstants(){}
 }

@@ -3,9 +3,9 @@ package com.mjc.school.service;
 import com.mjc.school.service.dto.NewsDtoRequest;
 import com.mjc.school.service.dto.NewsDtoResponse;
 import com.mjc.school.service.dto.ParametersDtoRequest;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface NewsService extends BaseService<NewsDtoRequest, NewsDtoResponse, Long> {
-    List<NewsDtoResponse> readByParams(ParametersDtoRequest parametersDtoRequest);
+    Page<NewsDtoResponse> readByParams(ParametersDtoRequest parametersDtoRequest, Pageable pageable);
 }

@@ -25,7 +25,7 @@ public interface CommentDtoMapper {
     CommentDtoResponse modelToDto(Comment model, @Context NewsDtoMapper newsDtoMapper);
 
     @Mappings({
-            @Mapping(target = "news", expression = "java(newsRepository.getReference(dtoRequest.getNewsId()))"),
+            @Mapping(target = "news", expression = "java(newsRepository.getReferenceById(dtoRequest.getNewsId()))"),
             @Mapping(target = "createDate", ignore = true),
             @Mapping(target = "lastUpdateDate", ignore = true),
     })

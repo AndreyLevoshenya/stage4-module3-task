@@ -23,9 +23,9 @@ public interface NewsDtoMapper {
     @Mappings({
             @Mapping(target = "createDate", ignore = true),
             @Mapping(target = "lastUpdateDate", ignore = true),
-            @Mapping(target = "author", expression = "java(authorRepository.getReference(dtoRequest.getAuthorId()))"),
+            @Mapping(target = "author", expression = "java(authorRepository.getReferenceById(dtoRequest.getAuthorId()))"),
             @Mapping(target = "tags", expression =
-                    "java(dtoRequest.getTagIds() != null ? dtoRequest.getTagIds().stream().map(tagId -> tagRepository.getReference(tagId)).toList() : newsRepository.readById(dtoRequest.getId()).get().getTags())"),
+                    "java(dtoRequest.getTagIds() != null ? dtoRequest.getTagIds().stream().map(tagId -> tagRepository.getReferenceById(tagId)).toList() : newsRepository.findById(dtoRequest.getId()).get().getTags())"),
             @Mapping(target = "comments", ignore = true)})
     News dtoToModel(
             NewsDtoRequest dtoRequest,

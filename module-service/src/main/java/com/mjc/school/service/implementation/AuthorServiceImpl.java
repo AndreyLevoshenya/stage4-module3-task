@@ -1,27 +1,25 @@
 package com.mjc.school.service.implementation;
 
 import com.mjc.school.repository.AuthorRepository;
-import com.mjc.school.repository.filter.Page;
-import com.mjc.school.repository.filter.Pagination;
-import com.mjc.school.repository.filter.SearchCriteria;
+import com.mjc.school.repository.filter.EntitySpecification;
 import com.mjc.school.repository.model.Author;
 import com.mjc.school.service.AuthorService;
 import com.mjc.school.service.annotations.Valid;
 import com.mjc.school.service.dto.AuthorDtoRequest;
 import com.mjc.school.service.dto.AuthorDtoResponse;
-import com.mjc.school.service.dto.PageDtoResponse;
 import com.mjc.school.service.dto.SearchingRequest;
 import com.mjc.school.service.exceptions.NotFoundException;
 import com.mjc.school.service.mapper.AuthorDtoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.mjc.school.service.exceptions.ExceptionErrorCodes.AUTHOR_DOES_NOT_EXIST;
-import static com.mjc.school.service.utils.Utils.getPagination;
-import static com.mjc.school.service.utils.Utils.getSearchCriteria;
 
 @Service
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -41,21 +39,22 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageDtoResponse<AuthorDtoResponse> readAll(@Valid SearchingRequest searchingRequest) {
-        Pagination pagination = getPagination(searchingRequest);
-        SearchCriteria searchCriteria = getSearchCriteria(searchingRequest);
-
-        Page<Author> page = authorRepository.readAll(pagination, searchCriteria);
-        return new PageDtoResponse<>(authorDtoMapper.modelListToDtoList(page.getEntities()), page.getPageNumber(), page.getPagesCount());
+    public Page<AuthorDtoResponse> readAll(@Valid SearchingRequest searchingRequest, Pageable pageable) {
+        if (searchingRequest == null) {
+            return authorRepository.findAll(pageable).map(authorDtoMapper::modelToDto);
+        }
+        String[] specs = searchingRequest.getFieldNameAndValue().split(":");
+        Specification<Author> specification = EntitySpecification.searchByField(specs[0], specs[1]);
+        return authorRepository.findAll(specification, pageable).map(authorDtoMapper::modelToDto);
     }
 
     @Override
     @Transactional(readOnly = true)
     public AuthorDtoResponse readById(@Valid Long id) {
-        if (!authorRepository.existById(id)) {
+        if (!authorRepository.existsById(id)) {
             throw new NotFoundException(String.format(AUTHOR_DOES_NOT_EXIST.getErrorMessage(), id));
         }
-        Author author = authorRepository.readById(id).get();
+        Author author = authorRepository.findById(id).get();
         return authorDtoMapper.modelToDto(author);
     }
 
@@ -64,18 +63,18 @@ public class AuthorServiceImpl implements AuthorService {
     public AuthorDtoResponse create(@Valid AuthorDtoRequest createRequest) {
         Author model = authorDtoMapper.dtoToModel(createRequest);
 
-        Author author = authorRepository.create(model);
+        Author author = authorRepository.save(model);
         return authorDtoMapper.modelToDto(author);
     }
 
     @Override
     @Transactional
     public AuthorDtoResponse update(@Valid AuthorDtoRequest updateRequest) {
-        if (!authorRepository.existById(updateRequest.getId())) {
+        if (!authorRepository.existsById(updateRequest.getId())) {
             throw new NotFoundException(String.format(AUTHOR_DOES_NOT_EXIST.getErrorMessage(), updateRequest.getId()));
         }
         Author author = authorDtoMapper.dtoToModel(updateRequest);
-        return authorDtoMapper.modelToDto(authorRepository.update(author));
+        return authorDtoMapper.modelToDto(authorRepository.save(author));
     }
 
     @Override
@@ -83,10 +82,10 @@ public class AuthorServiceImpl implements AuthorService {
     public AuthorDtoResponse patch(AuthorDtoRequest patchRequest) {
         Long id = patchRequest.getId();
         String name = patchRequest.getName();
-        if (id == null || !authorRepository.existById(id)) {
+        if (id == null || !authorRepository.existsById(id)) {
             throw new NotFoundException(String.format(AUTHOR_DOES_NOT_EXIST.getErrorMessage(), id));
         }
-        Author prevAuthor = authorRepository.readById(id).get();
+        Author prevAuthor = authorRepository.findById(id).get();
         name = name != null ? name : prevAuthor.getName();
 
         AuthorDtoRequest updateRequest = new AuthorDtoRequest(id, name);
@@ -95,11 +94,11 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     @Transactional
-    public boolean deleteById(@Valid Long id) {
-        if (!authorRepository.existById(id)) {
+    public void deleteById(@Valid Long id) {
+        if (!authorRepository.existsById(id)) {
             throw new NotFoundException(String.format(AUTHOR_DOES_NOT_EXIST.getErrorMessage(), id));
         }
-        return authorRepository.deleteById(id);
+        authorRepository.deleteById(id);
     }
 
     @Override

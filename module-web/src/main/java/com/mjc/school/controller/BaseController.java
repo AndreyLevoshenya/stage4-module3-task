@@ -1,11 +1,12 @@
 package com.mjc.school.controller;
 
-import com.mjc.school.service.dto.PageDtoResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 public interface BaseController<T, R, K> {
 
-    ResponseEntity<PageDtoResponse<R>> readAll(int pageNumber, int pageSize, String sortBy, String searchBy);
+    ResponseEntity<Page<R>> readAll(String searchBy, String searchValue, Pageable pageable);
 
     ResponseEntity<R> readById(K id);
 

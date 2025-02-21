@@ -1,7 +1,10 @@
 dependencies {
     implementation project(':module-repository')
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.7'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation "io.jsonwebtoken:jjwt-api:0.12.5"
+    runtimeOnly "io.jsonwebtoken:jjwt-impl:0.12.5"
+    runtimeOnly "io.jsonwebtoken:jjwt-jackson:0.12.5"
     implementation 'org.junit.jupiter:junit-jupiter:5.7.0'
 
     implementation 'org.springframework:spring-aspects:6.1.4'

@@ -3,28 +3,32 @@ package com.mjc.school.service.implementation;
 import com.mjc.school.repository.AuthorRepository;
 import com.mjc.school.repository.NewsRepository;
 import com.mjc.school.repository.TagRepository;
-import com.mjc.school.repository.filter.Page;
-import com.mjc.school.repository.filter.Pagination;
-import com.mjc.school.repository.filter.SearchCriteria;
+import com.mjc.school.repository.filter.EntitySpecification;
 import com.mjc.school.repository.model.News;
 import com.mjc.school.repository.model.SearchParameters;
 import com.mjc.school.repository.model.Tag;
 import com.mjc.school.service.NewsService;
 import com.mjc.school.service.annotations.Valid;
-import com.mjc.school.service.dto.*;
+import com.mjc.school.service.dto.NewsDtoRequest;
+import com.mjc.school.service.dto.NewsDtoResponse;
+import com.mjc.school.service.dto.ParametersDtoRequest;
+import com.mjc.school.service.dto.SearchingRequest;
 import com.mjc.school.service.exceptions.NotFoundException;
 import com.mjc.school.service.mapper.NewsDtoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.mjc.school.service.exceptions.ExceptionErrorCodes.*;
-import static com.mjc.school.service.utils.Utils.getPagination;
-import static com.mjc.school.service.utils.Utils.getSearchCriteria;
+import static com.mjc.school.service.exceptions.ExceptionErrorCodes.AUTHOR_DOES_NOT_EXIST;
+import static com.mjc.school.service.exceptions.ExceptionErrorCodes.NEWS_DOES_NOT_EXIST;
+import static com.mjc.school.service.exceptions.ExceptionErrorCodes.TAG_DOES_NOT_EXIST;
 
 @Service
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -47,52 +51,53 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageDtoResponse<NewsDtoResponse> readAll(@Valid SearchingRequest searchingRequest) {
-        Pagination pagination = getPagination(searchingRequest);
-        SearchCriteria searchCriteria = getSearchCriteria(searchingRequest);
-
-        Page<News> page = newsRepository.readAll(pagination, searchCriteria);
-        return new PageDtoResponse<>(newsDtoMapper.modelListToDtoList(page.getEntities()), page.getPageNumber(), page.getPagesCount());
+    public Page<NewsDtoResponse> readAll(@Valid SearchingRequest searchingRequest, Pageable pageable) {
+        if (searchingRequest == null) {
+            return newsRepository.findAll(pageable).map(newsDtoMapper::modelToDto);
+        }
+        String[] specs = searchingRequest.getFieldNameAndValue().split(":");
+        Specification<News> specification = EntitySpecification.searchByField(specs[0], specs[1]);
+        return newsRepository.findAll(specification, pageable).map(newsDtoMapper::modelToDto);
     }
 
     @Override
     @Transactional(readOnly = true)
     public NewsDtoResponse readById(@Valid Long id) {
-        if (!newsRepository.existById(id)) {
+        if (!newsRepository.existsById(id)) {
             throw new NotFoundException(String.format(NEWS_DOES_NOT_EXIST.getErrorMessage(), id));
         }
-        News news = newsRepository.readById(id).get();
+        News news = newsRepository.findById(id).get();
         return newsDtoMapper.modelToDto(news);
     }
 
     @Override
     @Transactional
     public NewsDtoResponse create(@Valid NewsDtoRequest createRequest) {
-        if (!authorRepository.existById(createRequest.getAuthorId())) {
+        if (!authorRepository.existsById(createRequest.getAuthorId())) {
             throw new NotFoundException(String.format(AUTHOR_DOES_NOT_EXIST.getErrorMessage(), createRequest.getAuthorId()));
         }
         News model = newsDtoMapper.dtoToModel(createRequest, newsRepository, authorRepository, tagRepository);
-        return newsDtoMapper.modelToDto(newsRepository.create(model));
+        return newsDtoMapper.modelToDto(newsRepository.save(model));
     }
 
     @Override
     @Transactional
     public NewsDtoResponse update(@Valid NewsDtoRequest updateRequest) {
-        if (!newsRepository.existById(updateRequest.getId())) {
+        if (!newsRepository.existsById(updateRequest.getId())) {
             throw new NotFoundException(String.format(NEWS_DOES_NOT_EXIST.getErrorMessage(), updateRequest.getId()));
         }
-        if (!authorRepository.existById(updateRequest.getAuthorId())) {
+        if (!authorRepository.existsById(updateRequest.getAuthorId())) {
             throw new NotFoundException(String.format(AUTHOR_DOES_NOT_EXIST.getErrorMessage(), updateRequest.getAuthorId()));
         }
 
         for (Long id : updateRequest.getTagIds()) {
-            if (!tagRepository.existById(id)) {
+            if (!tagRepository.existsById(id)) {
                 throw new NotFoundException(String.format(TAG_DOES_NOT_EXIST.getErrorMessage(), id));
             }
         }
 
         News news = newsDtoMapper.dtoToModel(updateRequest, newsRepository, authorRepository, tagRepository);
-        return newsDtoMapper.modelToDto(newsRepository.update(news));
+        return newsDtoMapper.modelToDto(newsRepository.save(news));
     }
 
     @Override
@@ -103,10 +108,10 @@ public class NewsServiceImpl implements NewsService {
         String content = patchRequest.getContent();
         Long authorId = patchRequest.getAuthorId();
         List<Long> tagIds = patchRequest.getTagIds();
-        if (id == null || !newsRepository.existById(id)) {
+        if (id == null || !newsRepository.existsById(id)) {
             throw new NotFoundException(String.format(NEWS_DOES_NOT_EXIST.getErrorMessage(), id));
         }
-        News prevNews = newsRepository.readById(id).get();
+        News prevNews = newsRepository.findById(id).get();
         title = title != null ? title : prevNews.getTitle();
         content = content != null ? content : prevNews.getContent();
         if (authorId == null) {
@@ -121,22 +126,22 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     @Transactional
-    public boolean deleteById(@Valid Long id) {
-        if (!newsRepository.existById(id)) {
+    public void deleteById(@Valid Long id) {
+        if (!newsRepository.existsById(id)) {
             throw new NotFoundException(String.format(NEWS_DOES_NOT_EXIST.getErrorMessage(), id));
         }
-        return newsRepository.deleteById(id);
+        newsRepository.deleteById(id);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<NewsDtoResponse> readByParams(ParametersDtoRequest parametersDtoRequest) {
+    public Page<NewsDtoResponse> readByParams(ParametersDtoRequest parametersDtoRequest, Pageable pageable) {
         SearchParameters params = new SearchParameters(
                 !parametersDtoRequest.newsTitle().isEmpty() ? parametersDtoRequest.newsTitle() : null,
                 !parametersDtoRequest.newsContent().isEmpty() ? parametersDtoRequest.newsContent() : null,
                 !parametersDtoRequest.authorName().isEmpty() ? parametersDtoRequest.authorName() : null,
                 (parametersDtoRequest.tagIds() != null && !parametersDtoRequest.tagIds().isEmpty()) ? parametersDtoRequest.tagIds() : null,
                 (parametersDtoRequest.tagNames() != null && !parametersDtoRequest.tagNames().isEmpty()) ? parametersDtoRequest.tagNames() : null);
-        return newsDtoMapper.modelListToDtoList(newsRepository.readByParams(params));
+        return newsRepository.readByParams(params, pageable).map(newsDtoMapper::modelToDto);
     }
 }

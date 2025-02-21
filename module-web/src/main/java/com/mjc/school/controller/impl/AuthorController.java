@@ -4,28 +4,38 @@ import com.mjc.school.controller.BaseController;
 import com.mjc.school.service.AuthorService;
 import com.mjc.school.service.dto.AuthorDtoRequest;
 import com.mjc.school.service.dto.AuthorDtoResponse;
-import com.mjc.school.service.dto.PageDtoResponse;
 import com.mjc.school.service.dto.SearchingRequest;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.hateoas.Link;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import static com.mjc.school.controller.RestConstants.AUTHORS_V1_API_PATH;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping(value = AUTHORS_V1_API_PATH)
-@Api(produces = MediaType.APPLICATION_JSON_VALUE, value = "Operations for creating, updating, retrieving and deleting authors in the application")
 public class AuthorController implements BaseController<AuthorDtoRequest, AuthorDtoResponse, Long> {
     private final AuthorService authorService;
 
@@ -35,24 +45,26 @@ public class AuthorController implements BaseController<AuthorDtoRequest, Author
     }
 
     @Override
-    @ApiOperation(value = "View all authors", response = List.class)
+    @Operation(summary = "View all authors")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully retrieved all authors"),
-            @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
-            @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 500, message = "Application failed to process the request")})
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved all authors"),
+            @ApiResponse(responseCode = "401", description = "You are not authorized to view the resource"),
+            @ApiResponse(responseCode = "403", description = "Accessing the resource you were trying to reach is forbidden"),
+            @ApiResponse(responseCode = "404", description = "The resource you were trying to reach is not found"),
+            @ApiResponse(responseCode = "500", description = "Application failed to process the request")})
     @GetMapping
     @ResponseStatus(OK)
     @PreAuthorize("permitAll()")
-    public ResponseEntity<PageDtoResponse<AuthorDtoResponse>> readAll(
-            @RequestParam(name = "page", required = false, defaultValue = "1") int pageNumber,
-            @RequestParam(name = "size", required = false, defaultValue = "10") int pageSize,
-            @RequestParam(name = "sort_by", required = false, defaultValue = "name:desc") String sortBy,
-            @RequestParam(name = "search_by", required = false) String searchBy) {
-        SearchingRequest searchingRequest = new SearchingRequest(pageNumber, pageSize, sortBy, searchBy);
-        PageDtoResponse<AuthorDtoResponse> pageDtoResponse = authorService.readAll(searchingRequest);
-        for (AuthorDtoResponse authorDtoResponse : pageDtoResponse.getEntityDtoList()) {
+    public ResponseEntity<Page<AuthorDtoResponse>> readAll(
+            @RequestParam(name = "searchBy", required = false) String searchBy,
+            @RequestParam(name = "searchValue", required = false) String searchValue,
+            @PageableDefault(sort = "name", direction = Sort.Direction.DESC) Pageable pageable) {
+        SearchingRequest searchingRequest = null;
+        if (searchBy != null && !searchBy.isBlank() && searchValue != null && !searchValue.isBlank()) {
+            searchingRequest = new SearchingRequest(searchBy + ":" + searchValue);
+        }
+        Page<AuthorDtoResponse> pageDtoResponse = authorService.readAll(searchingRequest, pageable);
+        for (AuthorDtoResponse authorDtoResponse : pageDtoResponse.stream().toList()) {
             Link selfRel = linkTo(AuthorController.class).slash(authorDtoResponse.getId()).withSelfRel();
             authorDtoResponse.add(selfRel);
         }
@@ -61,13 +73,13 @@ public class AuthorController implements BaseController<AuthorDtoRequest, Author
     }
 
     @Override
-    @ApiOperation(value = "Get author by id", response = AuthorDtoResponse.class)
+    @Operation(summary = "Get author by id")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully retrieved authors by id"),
-            @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
-            @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 500, message = "Application failed to process the request")})
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved authors by id"),
+            @ApiResponse(responseCode = "401", description = "You are not authorized to view the resource"),
+            @ApiResponse(responseCode = "403", description = "Accessing the resource you were trying to reach is forbidden"),
+            @ApiResponse(responseCode = "404", description = "The resource you were trying to reach is not found"),
+            @ApiResponse(responseCode = "500", description = "Application failed to process the request")})
     @GetMapping(value = "/{id}")
     @ResponseStatus(OK)
     @PreAuthorize("permitAll()")
@@ -79,13 +91,13 @@ public class AuthorController implements BaseController<AuthorDtoRequest, Author
     }
 
     @Override
-    @ApiOperation(value = "Create author", response = AuthorDtoResponse.class)
+    @Operation(summary = "Create author")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Successfully created a author"),
-            @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
-            @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 500, message = "Application failed to process the request")})
+            @ApiResponse(responseCode = "201", description = "Successfully created an author"),
+            @ApiResponse(responseCode = "401", description = "You are not authorized to view the resource"),
+            @ApiResponse(responseCode = "403", description = "Accessing the resource you were trying to reach is forbidden"),
+            @ApiResponse(responseCode = "404", description = "The resource you were trying to reach is not found"),
+            @ApiResponse(responseCode = "500", description = "Application failed to process the request")})
     @PostMapping
     @ResponseStatus(CREATED)
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
@@ -97,13 +109,13 @@ public class AuthorController implements BaseController<AuthorDtoRequest, Author
     }
 
     @Override
-    @ApiOperation(value = "Update author information", response = AuthorDtoResponse.class)
+    @Operation(summary = "Update author information")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully updated author information"),
-            @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
-            @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 500, message = "Application failed to process the request")})
+            @ApiResponse(responseCode = "200", description = "Successfully updated author information"),
+            @ApiResponse(responseCode = "401", description = "You are not authorized to view the resource"),
+            @ApiResponse(responseCode = "403", description = "Accessing the resource you were trying to reach is forbidden"),
+            @ApiResponse(responseCode = "404", description = "The resource you were trying to reach is not found"),
+            @ApiResponse(responseCode = "500", description = "Application failed to process the request")})
     @PutMapping(value = "/{id}")
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -116,13 +128,13 @@ public class AuthorController implements BaseController<AuthorDtoRequest, Author
     }
 
     @Override
-    @ApiOperation(value = "Patch author information", response = AuthorDtoResponse.class)
+    @Operation(summary = "Patch author information")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully patched author information"),
-            @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
-            @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 500, message = "Application failed to process the request")})
+            @ApiResponse(responseCode = "200", description = "Successfully patched author information"),
+            @ApiResponse(responseCode = "401", description = "You are not authorized to view the resource"),
+            @ApiResponse(responseCode = "403", description = "Accessing the resource you were trying to reach is forbidden"),
+            @ApiResponse(responseCode = "404", description = "The resource you were trying to reach is not found"),
+            @ApiResponse(responseCode = "500", description = "Application failed to process the request")})
     @PatchMapping(value = "/{id}")
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -135,13 +147,13 @@ public class AuthorController implements BaseController<AuthorDtoRequest, Author
     }
 
     @Override
-    @ApiOperation(value = "Deletes specific author with the supplied id")
+    @Operation(summary = "Deletes specific author with the supplied id")
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Successfully deletes the specific author"),
-            @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
-            @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 500, message = "Application failed to process the request")})
+            @ApiResponse(responseCode = "204", description = "Successfully deletes the specific author"),
+            @ApiResponse(responseCode = "401", description = "You are not authorized to view the resource"),
+            @ApiResponse(responseCode = "403", description = "Accessing the resource you were trying to reach is forbidden"),
+            @ApiResponse(responseCode = "404", description = "The resource you were trying to reach is not found"),
+            @ApiResponse(responseCode = "500", description = "Application failed to process the request")})
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(NO_CONTENT)
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")

@@ -1,9 +1,9 @@
 package com.mjc.school.controller.auth;
 
+import com.mjc.school.service.auth.AuthenticationService;
 import com.mjc.school.service.dto.AuthenticationRequest;
 import com.mjc.school.service.dto.AuthenticationResponse;
 import com.mjc.school.service.dto.RegisterRequest;
-import com.mjc.school.service.implementation.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +31,5 @@ public class AuthenticationController {
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
         return ResponseEntity.ok(authenticationService.authenticate(request));
-
     }
 }

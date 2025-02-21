@@ -2,9 +2,9 @@ package com.mjc.school.service;
 
 import com.mjc.school.service.dto.TagDtoRequest;
 import com.mjc.school.service.dto.TagDtoResponse;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface TagService extends BaseService<TagDtoRequest, TagDtoResponse, Long> {
-    List<TagDtoResponse> readByNewsId(Long newsId);
+    Page<TagDtoResponse> readByNewsId(Long newsId, Pageable pageable);
 }

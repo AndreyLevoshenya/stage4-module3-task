@@ -1,10 +1,12 @@
 package com.mjc.school.service;
 
-import com.mjc.school.service.dto.PageDtoResponse;
+import com.mjc.school.service.annotations.Valid;
 import com.mjc.school.service.dto.SearchingRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface BaseService<T, R, K> {
-    PageDtoResponse<R> readAll(SearchingRequest searchingRequest);
+    Page<R> readAll(@Valid SearchingRequest searchingRequest, Pageable pageable);
 
     R readById(K id);
 
@@ -14,5 +16,5 @@ public interface BaseService<T, R, K> {
 
     R patch(T patchRequest);
 
-    boolean deleteById(K id);
+    void deleteById(K id);
 }

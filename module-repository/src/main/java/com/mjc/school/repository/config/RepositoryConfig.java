@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableJpaAuditing
-@EnableJpaRepositories
+@EnableJpaRepositories(basePackages = "com.mjc.school.repository")
 @EnableTransactionManagement
 @EntityScan(basePackages = "com.mjc.school.repository.model")
 @PropertySource("classpath:application-repository.properties")

@@ -2,27 +2,41 @@ package com.mjc.school.controller.impl;
 
 import com.mjc.school.controller.BaseController;
 import com.mjc.school.service.CommentService;
-import com.mjc.school.service.dto.*;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import com.mjc.school.service.dto.CommentDtoRequest;
+import com.mjc.school.service.dto.CommentDtoResponse;
+import com.mjc.school.service.dto.SearchingRequest;
+import com.mjc.school.service.dto.TagDtoResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.hateoas.Link;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import static com.mjc.school.controller.RestConstants.COMMENTS_V1_API_PATH;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping(value = COMMENTS_V1_API_PATH)
-@Api(produces = MediaType.APPLICATION_JSON_VALUE, value = "Operations for creating, updating, retrieving and deleting comments in the application")
 public class CommentController implements BaseController<CommentDtoRequest, CommentDtoResponse, Long> {
     private final CommentService commentService;
 
@@ -32,24 +46,26 @@ public class CommentController implements BaseController<CommentDtoRequest, Comm
     }
 
     @Override
-    @ApiOperation(value = "View all comments", response = List.class)
+    @Operation(summary = "View all comments")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully retrieved all comments"),
-            @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
-            @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 500, message = "Application failed to process the request")})
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved all comments"),
+            @ApiResponse(responseCode = "401", description = "You are not authorized to view the resource"),
+            @ApiResponse(responseCode = "403", description = "Accessing the resource you were trying to reach is forbidden"),
+            @ApiResponse(responseCode = "404", description = "The resource you were trying to reach is not found"),
+            @ApiResponse(responseCode = "500", description = "Application failed to process the request")})
     @GetMapping
     @ResponseStatus(OK)
     @PreAuthorize("permitAll()")
-    public ResponseEntity<PageDtoResponse<CommentDtoResponse>> readAll(
-            @RequestParam(name = "page", required = false, defaultValue = "1") int pageNumber,
-            @RequestParam(name = "size", required = false, defaultValue = "10") int pageSize,
-            @RequestParam(name = "sort_by", required = false, defaultValue = "createDate:desc") String sortBy,
-            @RequestParam(name = "search_by", required = false) String searchBy) {
-        SearchingRequest searchingRequest = new SearchingRequest(pageNumber, pageSize, sortBy, searchBy);
-        PageDtoResponse<CommentDtoResponse> pageDtoResponse = commentService.readAll(searchingRequest);
-        for (CommentDtoResponse commentDtoResponse : pageDtoResponse.getEntityDtoList()) {
+    public ResponseEntity<Page<CommentDtoResponse>> readAll(
+            @RequestParam(name = "searchBy", required = false) String searchBy,
+            @RequestParam(name = "searchValue", required = false) String searchValue,
+            @PageableDefault(sort = "content", direction = Sort.Direction.DESC) Pageable pageable) {
+        SearchingRequest searchingRequest = null;
+        if (searchBy != null && !searchBy.isBlank() && searchValue != null && !searchValue.isBlank()) {
+            searchingRequest = new SearchingRequest(searchBy + ":" + searchValue);
+        }
+        Page<CommentDtoResponse> pageDtoResponse = commentService.readAll(searchingRequest, pageable);
+        for (CommentDtoResponse commentDtoResponse : pageDtoResponse.stream().toList()) {
             setLinks(commentDtoResponse);
         }
 
@@ -57,13 +73,13 @@ public class CommentController implements BaseController<CommentDtoRequest, Comm
     }
 
     @Override
-    @ApiOperation(value = "Get comment by id", response = CommentDtoResponse.class)
+    @Operation(summary = "Get comment by id")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully retrieved comment by id"),
-            @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
-            @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 500, message = "Application failed to process the request")})
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved comment by id"),
+            @ApiResponse(responseCode = "401", description = "You are not authorized to view the resource"),
+            @ApiResponse(responseCode = "403", description = "Accessing the resource you were trying to reach is forbidden"),
+            @ApiResponse(responseCode = "404", description = "The resource you were trying to reach is not found"),
+            @ApiResponse(responseCode = "500", description = "Application failed to process the request")})
     @GetMapping(value = "/{id}")
     @ResponseStatus(OK)
     @PreAuthorize("permitAll()")
@@ -74,13 +90,13 @@ public class CommentController implements BaseController<CommentDtoRequest, Comm
     }
 
     @Override
-    @ApiOperation(value = "Create comment", response = CommentDtoResponse.class)
+    @Operation(summary = "Create comment")
     @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Successfully created a comment"),
-            @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
-            @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 500, message = "Application failed to process the request")})
+            @ApiResponse(responseCode = "201", description = "Successfully created a comment"),
+            @ApiResponse(responseCode = "401", description = "You are not authorized to view the resource"),
+            @ApiResponse(responseCode = "403", description = "Accessing the resource you were trying to reach is forbidden"),
+            @ApiResponse(responseCode = "404", description = "The resource you were trying to reach is not found"),
+            @ApiResponse(responseCode = "500", description = "Application failed to process the request")})
     @PostMapping
     @ResponseStatus(CREATED)
     @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
@@ -91,13 +107,13 @@ public class CommentController implements BaseController<CommentDtoRequest, Comm
     }
 
     @Override
-    @ApiOperation(value = "Update comment information", response = CommentDtoResponse.class)
+    @Operation(summary = "Update comment information")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully updated comment information"),
-            @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
-            @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 500, message = "Application failed to process the request")})
+            @ApiResponse(responseCode = "200", description = "Successfully updated comment information"),
+            @ApiResponse(responseCode = "401", description = "You are not authorized to view the resource"),
+            @ApiResponse(responseCode = "403", description = "Accessing the resource you were trying to reach is forbidden"),
+            @ApiResponse(responseCode = "404", description = "The resource you were trying to reach is not found"),
+            @ApiResponse(responseCode = "500", description = "Application failed to process the request")})
     @PutMapping(value = "/{id}")
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -109,13 +125,13 @@ public class CommentController implements BaseController<CommentDtoRequest, Comm
     }
 
     @Override
-    @ApiOperation(value = "Patch comment information", response = CommentDtoResponse.class)
+    @Operation(summary = "Patch comment information")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successfully patched comment information"),
-            @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
-            @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 500, message = "Application failed to process the request")})
+            @ApiResponse(responseCode = "200", description = "Successfully patched comment information"),
+            @ApiResponse(responseCode = "401", description = "You are not authorized to view the resource"),
+            @ApiResponse(responseCode = "403", description = "Accessing the resource you were trying to reach is forbidden"),
+            @ApiResponse(responseCode = "404", description = "The resource you were trying to reach is not found"),
+            @ApiResponse(responseCode = "500", description = "Application failed to process the request")})
     @PatchMapping(value = "/{id}")
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -127,13 +143,13 @@ public class CommentController implements BaseController<CommentDtoRequest, Comm
     }
 
     @Override
-    @ApiOperation(value = "Deletes specific comment with the supplied id")
+    @Operation(summary = "Deletes specific comment with the supplied id")
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Successfully deletes the specific comment"),
-            @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
-            @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-            @ApiResponse(code = 404, message = "The resource you were trying to reach is not found"),
-            @ApiResponse(code = 500, message = "Application failed to process the request")})
+            @ApiResponse(responseCode = "204", description = "Successfully deletes the specific comment"),
+            @ApiResponse(responseCode = "401", description = "You are not authorized to view the resource"),
+            @ApiResponse(responseCode = "403", description = "Accessing the resource you were trying to reach is forbidden"),
+            @ApiResponse(responseCode = "404", description = "The resource you were trying to reach is not found"),
+            @ApiResponse(responseCode = "500", description = "Application failed to process the request")})
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(NO_CONTENT)
     @PreAuthorize("hasAuthority('ADMIN')")

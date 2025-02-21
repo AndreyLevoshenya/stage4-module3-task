@@ -1,0 +1,22 @@
+# Gradle
+.gradle/
+build/
+out/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# Logs and temp
+*.log
+*.tmp
+*.swp
+
+# Environment variables
+.env
+secrets.json
+application-*.yml
+application-*.properties
+
+# Gradle Wrapper (если не используете локальный Gradle)
+gradle/wrapper/gradle-wrapper.jar
