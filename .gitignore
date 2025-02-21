@@ -17,6 +17,3 @@ out/
 secrets.json
 application-*.yml
 application-*.properties
-
-# Gradle Wrapper (если не используете локальный Gradle)
-gradle/wrapper/gradle-wrapper.jar
