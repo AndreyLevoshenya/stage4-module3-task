@@ -63,10 +63,8 @@ public class NewsServiceImpl implements NewsService {
     @Override
     @Transactional(readOnly = true)
     public NewsDtoResponse readById(@Valid Long id) {
-        if (!newsRepository.existsById(id)) {
-            throw new NotFoundException(String.format(NEWS_DOES_NOT_EXIST.getErrorMessage(), id));
-        }
-        News news = newsRepository.findById(id).get();
+        News news = newsRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format(NEWS_DOES_NOT_EXIST.getErrorMessage(), id)));
         return newsDtoMapper.modelToDto(news);
     }
 
@@ -108,10 +106,11 @@ public class NewsServiceImpl implements NewsService {
         String content = patchRequest.getContent();
         Long authorId = patchRequest.getAuthorId();
         List<Long> tagIds = patchRequest.getTagIds();
-        if (id == null || !newsRepository.existsById(id)) {
+        if (id == null) {
             throw new NotFoundException(String.format(NEWS_DOES_NOT_EXIST.getErrorMessage(), id));
         }
-        News prevNews = newsRepository.findById(id).get();
+        News prevNews = newsRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format(NEWS_DOES_NOT_EXIST.getErrorMessage(), id)));
         title = title != null ? title : prevNews.getTitle();
         content = content != null ? content : prevNews.getContent();
         if (authorId == null) {

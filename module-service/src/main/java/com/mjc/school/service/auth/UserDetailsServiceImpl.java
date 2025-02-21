@@ -2,6 +2,7 @@ package com.mjc.school.service.auth;
 
 import com.mjc.school.repository.UserRepository;
 import com.mjc.school.repository.model.User;
+import com.mjc.school.service.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,7 +20,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("User not found"));
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),

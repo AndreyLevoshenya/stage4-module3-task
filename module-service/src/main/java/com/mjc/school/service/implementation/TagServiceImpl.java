@@ -55,10 +55,8 @@ public class TagServiceImpl implements TagService {
     @Override
     @Transactional(readOnly = true)
     public TagDtoResponse readById(@Valid Long id) {
-        if (!tagRepository.existsById(id)) {
-            throw new NotFoundException(String.format(TAG_DOES_NOT_EXIST.getErrorMessage(), id));
-        }
-        Tag tag = tagRepository.findById(id).get();
+        Tag tag = tagRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format(TAG_DOES_NOT_EXIST.getErrorMessage(), id)));
         return tagDtoMapper.modelToDto(tag);
     }
 
@@ -84,10 +82,11 @@ public class TagServiceImpl implements TagService {
     public TagDtoResponse patch(TagDtoRequest patchRequest) {
         Long id = patchRequest.getId();
         String name = patchRequest.getName();
-        if (id == null || !tagRepository.existsById(id)) {
+        if (id == null) {
             throw new NotFoundException(String.format(TAG_DOES_NOT_EXIST.getErrorMessage(), id));
         }
-        Tag prevTag = tagRepository.findById(id).get();
+        Tag prevTag = tagRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format(TAG_DOES_NOT_EXIST.getErrorMessage(), id)));
         name = name != null ? name : prevTag.getName();
 
         TagDtoRequest updateRequest = new TagDtoRequest(id, name);

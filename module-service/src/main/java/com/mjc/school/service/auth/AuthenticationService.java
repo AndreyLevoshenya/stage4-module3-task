@@ -6,11 +6,11 @@ import com.mjc.school.repository.model.User;
 import com.mjc.school.service.dto.AuthenticationRequest;
 import com.mjc.school.service.dto.AuthenticationResponse;
 import com.mjc.school.service.dto.RegisterRequest;
+import com.mjc.school.service.exceptions.NotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +48,7 @@ public class AuthenticationService {
     @Transactional
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-        var user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND));
+        var user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
         var jwtToken = jwtService.generateToken(user);
         return new AuthenticationResponse(jwtToken);
     }

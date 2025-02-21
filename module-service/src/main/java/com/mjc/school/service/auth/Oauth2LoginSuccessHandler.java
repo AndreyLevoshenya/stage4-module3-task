@@ -16,6 +16,12 @@ import java.io.IOException;
 
 @Component
 public class Oauth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+    private static final String APPLICATION_JSON = "application/json";
+    private static final String EMPTY = "";
+    private static final String EMAIL = "email";
+    private static final String GIVEN_NAME = "given_name";
+    private static final String FAMILY_NAME = "family_name";
+
     private final UserRepository userRepository;
     private final JwtService jwtService;
 
@@ -30,17 +36,17 @@ public class Oauth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         OAuth2AuthenticationToken authToken = (OAuth2AuthenticationToken) authentication;
         OAuth2User oAuth2User = authToken.getPrincipal();
 
-        String email = oAuth2User.getAttribute("email");
-        String firstName = oAuth2User.getAttribute("given_name");
-        String lastName = oAuth2User.getAttribute("family_name");
+        String email = oAuth2User.getAttribute(EMAIL);
+        String firstName = oAuth2User.getAttribute(GIVEN_NAME);
+        String lastName = oAuth2User.getAttribute(FAMILY_NAME);
 
         User user = userRepository.findByUsername(email).orElseGet(() -> {
-            User newUser = new User(null, firstName, lastName, email, "", Role.USER);
+            User newUser = new User(null, firstName, lastName, email, EMPTY, Role.USER);
             return userRepository.save(newUser);
         });
 
         String jwt = jwtService.generateToken(user);
-        response.setContentType("application/json");
+        response.setContentType(APPLICATION_JSON);
         response.getWriter().write("{\"token\": \"" + jwt + "\"}");
         response.getWriter().flush();
     }

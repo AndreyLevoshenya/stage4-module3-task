@@ -9,8 +9,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableJpaAuditing
-@EnableJpaRepositories(basePackages = "com.mjc.school.repository")
 @EnableTransactionManagement
+@EnableJpaRepositories(basePackages = "com.mjc.school.repository")
 @EntityScan(basePackages = "com.mjc.school.repository.model")
 @PropertySource("classpath:application-repository.properties")
 public class RepositoryConfig {

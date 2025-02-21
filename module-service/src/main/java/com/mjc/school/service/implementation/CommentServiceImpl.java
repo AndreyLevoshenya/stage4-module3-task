@@ -58,10 +58,9 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional(readOnly = true)
     public CommentDtoResponse readById(@Valid Long id) {
-        if (!commentRepository.existsById(id)) {
-            throw new NotFoundException(String.format(COMMENT_DOES_NOT_EXIST.getErrorMessage(), id));
-        }
-        return commentDtoMapper.modelToDto(commentRepository.findById(id).get(), newsDtoMapper);
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format(COMMENT_DOES_NOT_EXIST.getErrorMessage(), id)));
+        return commentDtoMapper.modelToDto(comment, newsDtoMapper);
     }
 
     @Override
@@ -86,10 +85,11 @@ public class CommentServiceImpl implements CommentService {
     public CommentDtoResponse patch(CommentDtoRequest patchRequest) {
         Long id = patchRequest.getId();
         String content = patchRequest.getContent();
-        if (id == null || !commentRepository.existsById(id)) {
+        if (id == null) {
             throw new NotFoundException(String.format(COMMENT_DOES_NOT_EXIST.getErrorMessage(), id));
         }
-        Comment prevComment = commentRepository.findById(id).get();
+        Comment prevComment = commentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format(COMMENT_DOES_NOT_EXIST.getErrorMessage(), id)));
         content = content != null ? content : prevComment.getContent();
 
         CommentDtoRequest updateRequest = new CommentDtoRequest(id, content, prevComment.getNews().getId());

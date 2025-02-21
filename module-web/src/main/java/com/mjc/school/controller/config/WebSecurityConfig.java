@@ -24,6 +24,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @PropertySource("classpath:application-web.properties")
 public class WebSecurityConfig {
+    private static final String ADMIN = "ADMIN";
+    private static final String USER = "USER";
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
     private final Oauth2LoginSuccessHandler oauth2LoginSuccessHandler;
@@ -49,8 +51,8 @@ public class WebSecurityConfig {
                                 "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/news", "/api/v1/comments").hasAnyAuthority("USER", "ADMIN")
-                        .anyRequest().hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/news", "/api/v1/comments").hasAnyAuthority(USER, ADMIN)
+                        .anyRequest().hasAuthority(ADMIN)
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oauth2LoginSuccessHandler)

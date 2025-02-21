@@ -51,10 +51,8 @@ public class AuthorServiceImpl implements AuthorService {
     @Override
     @Transactional(readOnly = true)
     public AuthorDtoResponse readById(@Valid Long id) {
-        if (!authorRepository.existsById(id)) {
-            throw new NotFoundException(String.format(AUTHOR_DOES_NOT_EXIST.getErrorMessage(), id));
-        }
-        Author author = authorRepository.findById(id).get();
+        Author author = authorRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format(AUTHOR_DOES_NOT_EXIST.getErrorMessage(), id)));
         return authorDtoMapper.modelToDto(author);
     }
 
@@ -82,10 +80,11 @@ public class AuthorServiceImpl implements AuthorService {
     public AuthorDtoResponse patch(AuthorDtoRequest patchRequest) {
         Long id = patchRequest.getId();
         String name = patchRequest.getName();
-        if (id == null || !authorRepository.existsById(id)) {
+        if (id == null) {
             throw new NotFoundException(String.format(AUTHOR_DOES_NOT_EXIST.getErrorMessage(), id));
         }
-        Author prevAuthor = authorRepository.findById(id).get();
+        Author prevAuthor = authorRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format(AUTHOR_DOES_NOT_EXIST.getErrorMessage(), id)));
         name = name != null ? name : prevAuthor.getName();
 
         AuthorDtoRequest updateRequest = new AuthorDtoRequest(id, name);

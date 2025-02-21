@@ -12,13 +12,9 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 @Mapper(componentModel = "spring")
 public interface NewsDtoMapper {
-
-    List<NewsDtoResponse> modelListToDtoList(List<News> modelList);
 
     @Mappings({
             @Mapping(target = "createDate", ignore = true),

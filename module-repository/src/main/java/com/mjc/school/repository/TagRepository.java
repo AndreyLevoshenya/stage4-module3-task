@@ -9,9 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface TagRepository extends JpaRepository<Tag, Long>, JpaSpecificationExecutor<Tag> {
-    @Override
-    Page<Tag> findAll(Pageable pageable);
-
     @Query("SELECT t FROM Tag t INNER JOIN t.news n WHERE n.id = :newsId")
     Page<Tag> readByNewsId(@Param("newsId") Long newsId, Pageable pageable);
 }

@@ -12,8 +12,6 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface AuthorDtoMapper {
 
-    List<AuthorDtoResponse> modelListToDtoList(List<Author> modelList);
-
     AuthorDtoResponse modelToDto(Author model);
 
     @Mappings({

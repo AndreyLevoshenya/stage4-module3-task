@@ -9,15 +9,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 
-import java.util.List;
-
 @Mapper(componentModel = "spring")
 public interface CommentDtoMapper {
-
-    @Mappings({
-            @Mapping(target = "newsDtoResponse", expression = "java(newsDtoMapper.modelToDto(model.getNews()))")
-    })
-    List<CommentDtoResponse> modelListToDtoList(List<Comment> modelList, @Context NewsDtoMapper newsDtoMapper);
 
     @Mappings({
             @Mapping(target = "newsDtoResponse", expression = "java(newsDtoMapper.modelToDto(model.getNews()))")
