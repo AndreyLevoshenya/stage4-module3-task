@@ -14,10 +14,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import static com.mjc.school.service.exceptions.ExceptionErrorCodes.USER_DOES_NOT_EXIST;
+
 @Service
 public class AuthenticationService {
-    public static final String USER_NOT_FOUND = "User not found";
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -48,7 +48,8 @@ public class AuthenticationService {
     @Transactional
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-        var user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND));
+        var user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new NotFoundException(String.format(USER_DOES_NOT_EXIST.getErrorMessage(), request.getUsername())));
         var jwtToken = jwtService.generateToken(user);
         return new AuthenticationResponse(jwtToken);
     }

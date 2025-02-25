@@ -8,7 +8,8 @@ public enum ExceptionErrorCodes {
     COMMENT_DOES_NOT_EXIST("000004", "Comment with id %d does not exist"),
     VALIDATION_EXCEPTION("000005", "Validation failed %s"),
     API_VERSION_NOT_SUPPORTED("000006", "Api version %s is not supported"),
-    RESOURCE_NOT_FOUND("000007", "Resource not found");
+    RESOURCE_NOT_FOUND("000007", "Resource not found"),
+    USER_DOES_NOT_EXIST("000008", "User with username %s does not exist");
 
     private final String errorCode;
     private final String errorMessage;
