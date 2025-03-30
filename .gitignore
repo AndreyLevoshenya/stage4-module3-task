@@ -15,5 +15,3 @@ out/
 # Environment variables
 .env
 secrets.json
-application-*.yml
-application-*.properties
