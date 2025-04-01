@@ -57,6 +57,17 @@ public class NewsController implements BaseController<NewsDtoRequest, NewsDtoRes
         this.commentService = commentService;
     }
 
+    private static void setLinks(NewsDtoResponse newsDtoResponse) {
+        Link selfRel = linkTo(NewsController.class).slash(newsDtoResponse.getId()).withSelfRel();
+        newsDtoResponse.add(selfRel);
+        Link authorRel = linkTo(AuthorController.class).slash(newsDtoResponse.getAuthorDtoResponse().getId()).withSelfRel();
+        newsDtoResponse.getAuthorDtoResponse().add(authorRel);
+        for (TagDtoResponse tagDtoResponse : newsDtoResponse.getTagDtoResponseList()) {
+            Link tagRel = linkTo(TagController.class).slash(tagDtoResponse.getId()).withSelfRel();
+            tagDtoResponse.add(tagRel);
+        }
+    }
+
     @Override
     @Operation(summary = "View all news")
     @ApiResponses(value = {
@@ -239,16 +250,5 @@ public class NewsController implements BaseController<NewsDtoRequest, NewsDtoRes
             commentDtoResponse.add(selfRel);
         }
         return new ResponseEntity<>(commentDtoResponseList, OK);
-    }
-
-    private static void setLinks(NewsDtoResponse newsDtoResponse) {
-        Link selfRel = linkTo(NewsController.class).slash(newsDtoResponse.getId()).withSelfRel();
-        newsDtoResponse.add(selfRel);
-        Link authorRel = linkTo(AuthorController.class).slash(newsDtoResponse.getAuthorDtoResponse().getId()).withSelfRel();
-        newsDtoResponse.getAuthorDtoResponse().add(authorRel);
-        for (TagDtoResponse tagDtoResponse : newsDtoResponse.getTagDtoResponseList()) {
-            Link tagRel = linkTo(TagController.class).slash(tagDtoResponse.getId()).withSelfRel();
-            tagDtoResponse.add(tagRel);
-        }
     }
 }

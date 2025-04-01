@@ -45,6 +45,19 @@ public class CommentController implements BaseController<CommentDtoRequest, Comm
         this.commentService = commentService;
     }
 
+    private static void setLinks(CommentDtoResponse commentDtoResponse) {
+        Link selfRel = linkTo(CommentController.class).slash(commentDtoResponse.getId()).withSelfRel();
+        commentDtoResponse.add(selfRel);
+        Link newsRel = linkTo(NewsController.class).slash(commentDtoResponse.getNewsDtoResponse().getId()).withSelfRel();
+        commentDtoResponse.getNewsDtoResponse().add(newsRel);
+        Link authorRel = linkTo(AuthorController.class).slash(commentDtoResponse.getNewsDtoResponse().getAuthorDtoResponse().getId()).withSelfRel();
+        commentDtoResponse.getNewsDtoResponse().getAuthorDtoResponse().add(authorRel);
+        for (TagDtoResponse tagDtoResponse : commentDtoResponse.getNewsDtoResponse().getTagDtoResponseList()) {
+            Link tagRel = linkTo(TagController.class).slash(tagDtoResponse.getId()).withSelfRel();
+            tagDtoResponse.add(tagRel);
+        }
+    }
+
     @Override
     @Operation(summary = "View all comments")
     @ApiResponses(value = {
@@ -155,18 +168,5 @@ public class CommentController implements BaseController<CommentDtoRequest, Comm
     @PreAuthorize("hasAuthority('ADMIN')")
     public void deleteById(@PathVariable Long id) {
         commentService.deleteById(id);
-    }
-
-    private static void setLinks(CommentDtoResponse commentDtoResponse) {
-        Link selfRel = linkTo(CommentController.class).slash(commentDtoResponse.getId()).withSelfRel();
-        commentDtoResponse.add(selfRel);
-        Link newsRel = linkTo(NewsController.class).slash(commentDtoResponse.getNewsDtoResponse().getId()).withSelfRel();
-        commentDtoResponse.getNewsDtoResponse().add(newsRel);
-        Link authorRel = linkTo(AuthorController.class).slash(commentDtoResponse.getNewsDtoResponse().getAuthorDtoResponse().getId()).withSelfRel();
-        commentDtoResponse.getNewsDtoResponse().getAuthorDtoResponse().add(authorRel);
-        for (TagDtoResponse tagDtoResponse : commentDtoResponse.getNewsDtoResponse().getTagDtoResponseList()) {
-            Link tagRel = linkTo(TagController.class).slash(tagDtoResponse.getId()).withSelfRel();
-            tagDtoResponse.add(tagRel);
-        }
     }
 }

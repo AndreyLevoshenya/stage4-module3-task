@@ -15,3 +15,9 @@ out/
 # Environment variables
 .env
 secrets.json
+
+/keystore
+*.keystore
+*.jks
+*.p12
+*.pem
