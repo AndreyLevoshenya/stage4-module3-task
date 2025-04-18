@@ -1,6 +1,5 @@
 package com.mjc.school.service.exceptions;
 
-//TODO при добавлении нарушение уникальности поля
 public enum ExceptionErrorCodes {
     NEWS_DOES_NOT_EXIST("000001", "News with id %d does not exist"),
     AUTHOR_DOES_NOT_EXIST("000002", "Author id does not exist. Author id is: %s"),

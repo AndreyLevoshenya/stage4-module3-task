@@ -9,6 +9,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +24,8 @@ import static com.mjc.school.service.exceptions.ExceptionErrorCodes.VALIDATION_E
 @Aspect
 @Component
 public class ValidationAspect {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ValidationAspect.class);
+
     private final Validator validator;
 
     @Autowired
@@ -35,6 +39,7 @@ public class ValidationAspect {
 
     @Before(value = "validAnnotation()")
     public void validateBeforeExecuting(JoinPoint joinPoint) throws NoSuchMethodException {
+        LOGGER.info("Validating args {}", joinPoint.getArgs());
         if (joinPoint.getSignature() instanceof MethodSignature signature) {
             Method targetMethod = getTargetMethod(joinPoint, signature);
             var args = joinPoint.getArgs();
@@ -46,6 +51,7 @@ public class ValidationAspect {
                 }
             }
             if (!violations.isEmpty()) {
+                LOGGER.error("Validation failed {}", violations);
                 throw new ValidationException(String.format(VALIDATION_EXCEPTION.getErrorMessage(), violations));
             }
         }

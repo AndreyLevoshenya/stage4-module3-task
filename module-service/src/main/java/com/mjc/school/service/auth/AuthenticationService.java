@@ -8,6 +8,8 @@ import com.mjc.school.service.dto.AuthenticationResponse;
 import com.mjc.school.service.dto.RegisterRequest;
 import com.mjc.school.service.exceptions.NotFoundException;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +20,8 @@ import static com.mjc.school.service.exceptions.ExceptionErrorCodes.USER_DOES_NO
 
 @Service
 public class AuthenticationService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationService.class);
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -33,6 +37,7 @@ public class AuthenticationService {
 
     @Transactional
     public AuthenticationResponse register(RegisterRequest request) {
+        LOGGER.info("Registering new user {}", request.getUsername());
         var user = new User(
                 null,
                 request.getFirstName(),
@@ -47,9 +52,13 @@ public class AuthenticationService {
 
     @Transactional
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        LOGGER.info("Authenticating user {}", request.getUsername());
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
         var user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new NotFoundException(String.format(USER_DOES_NOT_EXIST.getErrorMessage(), request.getUsername())));
+                .orElseThrow(() -> {
+                    LOGGER.error("User {} not found. Authentication failed", request.getUsername());
+                    return new NotFoundException(String.format(USER_DOES_NOT_EXIST.getErrorMessage(), request.getUsername()));
+                });
         var jwtToken = jwtService.generateToken(user);
         return new AuthenticationResponse(jwtToken);
     }
