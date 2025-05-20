@@ -73,6 +73,10 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public CommentDtoResponse create(@Valid CommentDtoRequest createRequest) {
         LOGGER.info("Creating comment with id {}", createRequest.getId());
+        if (!newsRepository.existsById(createRequest.getNewsId())) {
+            LOGGER.error("News with id {} not found. Unable to create comment", createRequest.getNewsId());
+            throw new NotFoundException(String.format(NEWS_DOES_NOT_EXIST.getErrorMessage(), createRequest.getNewsId()));
+        }
         Comment model = commentDtoMapper.dtoToModel(createRequest, newsRepository);
         return commentDtoMapper.modelToDto(commentRepository.save(model), newsDtoMapper);
     }

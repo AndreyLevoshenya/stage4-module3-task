@@ -7,6 +7,7 @@ import com.mjc.school.repository.model.Comment;
 import com.mjc.school.repository.model.News;
 import com.mjc.school.service.dto.CommentDtoRequest;
 import com.mjc.school.service.dto.CommentDtoResponse;
+import com.mjc.school.service.dto.NewsDtoResponse;
 import com.mjc.school.service.dto.SearchingRequest;
 import com.mjc.school.service.exception.NotFoundException;
 import com.mjc.school.service.mapper.CommentDtoMapper;
@@ -29,8 +30,7 @@ import java.util.Optional;
 
 import static com.mjc.school.service.exception.ExceptionErrorCodes.COMMENT_DOES_NOT_EXIST;
 import static com.mjc.school.service.exception.ExceptionErrorCodes.NEWS_DOES_NOT_EXIST;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -125,12 +125,15 @@ class CommentServiceImplTest {
     void create_shouldSaveAndReturnCommentDto() {
         Long id = 1L;
         LocalDateTime date = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-        CommentDtoRequest createRequest = new CommentDtoRequest(1L, "Content", null);
-        Comment model = new Comment("Content", null, date, date);
-        Comment savedComment = new Comment("Content", null, date, date);
+        CommentDtoRequest createRequest = new CommentDtoRequest(id, "Content", id);
+        Comment model = new Comment("Content", new News(), date, date);
+        model.getNews().setId(id);
+        Comment savedComment = new Comment("Content", new News(), date, date);
         savedComment.setId(id);
-        CommentDtoResponse expectedDto = new CommentDtoResponse(id, "Content", null, date, date);
-
+        savedComment.getNews().setId(id);
+        CommentDtoResponse expectedDto = new CommentDtoResponse(id, "Content", new NewsDtoResponse(), date, date);
+        expectedDto.getNewsDtoResponse().setId(id);
+        when(newsRepository.existsById(id)).thenReturn(true);
         when(commentDtoMapper.dtoToModel(createRequest, newsRepository)).thenReturn(model);
         when(commentRepository.save(model)).thenReturn(savedComment);
         when(commentDtoMapper.modelToDto(savedComment, newsDtoMapper)).thenReturn(expectedDto);
@@ -138,9 +141,25 @@ class CommentServiceImplTest {
         CommentDtoResponse actualDto = commentService.create(createRequest);
 
         assertEquals(expectedDto, actualDto);
+        verify(newsRepository).existsById(id);
         verify(commentDtoMapper).dtoToModel(createRequest, newsRepository);
         verify(commentRepository).save(model);
         verify(commentDtoMapper).modelToDto(savedComment, newsDtoMapper);
+    }
+
+    @Test
+    void create_shouldThrowNotFoundException_whenNewsNotFound() {
+        CommentDtoRequest request = new CommentDtoRequest();
+        request.setNewsId(123L);
+
+        when(newsRepository.existsById(123L)).thenReturn(false);
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> commentService.create(request));
+
+        assertEquals(String.format(NEWS_DOES_NOT_EXIST.getErrorMessage(), 123L), exception.getMessage());
+
+        verify(commentDtoMapper, never()).dtoToModel(any(), any());
+        verify(commentRepository, never()).save(any());
     }
 
     @Test

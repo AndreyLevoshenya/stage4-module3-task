@@ -15,8 +15,9 @@ dependencies {
     testRuntimeOnly 'com.h2database:h2'
 }
 
-bootWar {
+bootJar {
     archiveBaseName = 'application'
-    version = '1.0.0'
+    version = 'latest'
     mainClass = 'com.mjc.school.Main'
 }
+
