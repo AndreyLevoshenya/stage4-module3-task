@@ -1,5 +1,20 @@
 # Authentication & Spring Security
 
+## Materials
+
+1. [Spring Security Architecture](https://spring.io/guides/topicals/spring-security-architecture)
+2. [Securing a Web Application](https://spring.io/guides/gs/securing-web/)
+3. [The Complete Guide to OAuth 2.0 and OpenID Connect Protocols](https://betterprogramming.pub/the-complete-guide-to-oauth-2-0-and-openid-connect-protocols-35ebc1cbc11a)
+4. [Spring Boot and OAuth2](https://spring.io/guides/tutorials/spring-boot-oauth2/)
+5. [Introduction to JSON Web Tokens](https://jwt.io/introduction/)
+6. [Tutorial: Create and Verify JWTs in Java](https://developer.okta.com/blog/2018/10/31/jwts-with-java)
+7. [Simple Token Authentication for Java Apps](https://developer.okta.com/blog/2018/10/16/token-auth-for-java)
+
+## Practice
+
+#### Recommended Timeline
+The recommended timeline for the whole module is 2 weeks.
+
 ### Task
 
 This module is an extension of REST API Advanced module and covers following topics:
