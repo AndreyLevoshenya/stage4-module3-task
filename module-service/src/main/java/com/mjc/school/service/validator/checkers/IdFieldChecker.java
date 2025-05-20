@@ -1,6 +1,6 @@
 package com.mjc.school.service.validator.checkers;
 
-import com.mjc.school.service.annotations.IdField;
+import com.mjc.school.service.annotation.IdField;
 import org.springframework.stereotype.Component;
 
 @Component

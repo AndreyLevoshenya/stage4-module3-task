@@ -6,7 +6,7 @@ import com.mjc.school.repository.model.User;
 import com.mjc.school.service.dto.AuthenticationRequest;
 import com.mjc.school.service.dto.AuthenticationResponse;
 import com.mjc.school.service.dto.RegisterRequest;
-import com.mjc.school.service.exceptions.NotFoundException;
+import com.mjc.school.service.exception.NotFoundException;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import static com.mjc.school.service.exceptions.ExceptionErrorCodes.USER_DOES_NOT_EXIST;
+import static com.mjc.school.service.exception.ExceptionErrorCodes.USER_DOES_NOT_EXIST;
 
 @Service
 public class AuthenticationService {

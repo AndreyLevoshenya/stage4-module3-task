@@ -100,7 +100,7 @@ public class AuthorController implements BaseController<AuthorDtoRequest, Author
             @ApiResponse(responseCode = "500", description = "Application failed to process the request")})
     @PostMapping
     @ResponseStatus(CREATED)
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<AuthorDtoResponse> create(@RequestBody AuthorDtoRequest createRequest) {
         AuthorDtoResponse authorDtoResponse = authorService.create(createRequest);
         Link selfRel = linkTo(AuthorController.class).slash(authorDtoResponse.getId()).withSelfRel();
@@ -156,7 +156,7 @@ public class AuthorController implements BaseController<AuthorDtoRequest, Author
             @ApiResponse(responseCode = "500", description = "Application failed to process the request")})
     @DeleteMapping(value = "/{id}")
     @ResponseStatus(NO_CONTENT)
-    @PreAuthorize("hasAnyAuthority('USER', 'ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public void deleteById(@PathVariable Long id) {
         authorService.deleteById(id);
     }

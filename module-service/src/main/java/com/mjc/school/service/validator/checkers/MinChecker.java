@@ -1,6 +1,6 @@
 package com.mjc.school.service.validator.checkers;
 
-import com.mjc.school.service.annotations.Min;
+import com.mjc.school.service.annotation.Min;
 import org.springframework.stereotype.Component;
 
 @Component

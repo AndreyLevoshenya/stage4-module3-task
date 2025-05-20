@@ -1,7 +1,9 @@
 package com.mjc.school.service.validator;
 
-import com.mjc.school.service.annotations.Constraint;
+import com.mjc.school.service.annotation.Constraint;
 import com.mjc.school.service.validator.checkers.ConstraintChecker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,7 @@ import static java.util.stream.Collectors.toMap;
 
 @Component
 public class ValidatorImpl implements Validator {
+    private final Logger LOGGER = LoggerFactory.getLogger(ValidatorImpl.class);
     private final Map<Class<? extends Annotation>, ConstraintChecker> checkerMap;
 
     @Autowired
@@ -52,7 +55,7 @@ public class ValidatorImpl implements Validator {
                         }
                     }
                 } catch (IllegalAccessException e) {
-                    e.printStackTrace();
+                    LOGGER.error("Cannot access field {}.{}()", field.getName(), o.getClass().getSimpleName(), e);
                 }
 
             }

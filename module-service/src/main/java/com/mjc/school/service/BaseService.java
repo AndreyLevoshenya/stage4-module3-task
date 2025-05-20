@@ -1,6 +1,6 @@
 package com.mjc.school.service;
 
-import com.mjc.school.service.annotations.Valid;
+import com.mjc.school.service.annotation.Valid;
 import com.mjc.school.service.dto.SearchingRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

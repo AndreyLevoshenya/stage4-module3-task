@@ -26,13 +26,22 @@ subprojects {
 
     dependencies {
         implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
-        implementation "org.springframework.boot:spring-boot-starter"
-        implementation "org.springframework.boot:spring-boot-starter-data-jpa"
-        implementation "org.springframework.boot:spring-boot-starter-hateoas"
-        implementation "org.springframework.boot:spring-boot-starter-oauth2-client"
-        compileOnly 'org.sonarsource.sonarqube:sonar-plugin-api:9.3.0.51899'
-        implementation "javax.xml.bind:jaxb-api:2.3.1"
+        implementation group: 'org.springframework.boot', name: 'spring-boot-starter', version: '${springBootVersion}'
+        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: '${springBootVersion}'
+        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-hateoas', version: '${springBootVersion}'
+        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client', version: '${springBootVersion}'
+        implementation group: 'org.springframework.boot', name: 'spring-boot-starter-log4j2', version: '${springBootVersion}'
+        implementation group: 'org.apache.logging.log4j', name: 'log4j-layout-template-json', version: '2.22.1'
+        compileOnly group: 'org.sonarsource.sonarqube', name: 'sonar-plugin-api', version: '9.3.0.51899'
+        implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
 
+        testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '${springBootVersion}'
+
+    }
+    configurations {
+        configureEach {
+            exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+        }
     }
     test {
         useJUnitPlatform()

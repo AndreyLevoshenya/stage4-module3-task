@@ -1,8 +1,8 @@
 package com.mjc.school.service.dto;
 
-import com.mjc.school.service.annotations.IdField;
-import com.mjc.school.service.annotations.NotNull;
-import com.mjc.school.service.annotations.StringField;
+import com.mjc.school.service.annotation.IdField;
+import com.mjc.school.service.annotation.NotNull;
+import com.mjc.school.service.annotation.StringField;
 
 public final class AuthorDtoRequest {
     @IdField
