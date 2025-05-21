@@ -9,6 +9,7 @@ out/
 
 # Logs and temp
 *.log
+*.log.gz
 *.tmp
 *.swp
 

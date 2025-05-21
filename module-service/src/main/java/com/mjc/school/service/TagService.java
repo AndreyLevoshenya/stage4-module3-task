@@ -1,7 +1,7 @@
 package com.mjc.school.service;
 
-import com.mjc.school.service.dto.TagDtoRequest;
-import com.mjc.school.service.dto.TagDtoResponse;
+import com.mjc.school.dto.TagDtoRequest;
+import com.mjc.school.dto.TagDtoResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
