@@ -1,8 +1,8 @@
 package com.mjc.school.auth;
 
-import com.mjc.school.repository.UserRepository;
 import com.mjc.school.model.Role;
 import com.mjc.school.model.User;
+import com.mjc.school.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;

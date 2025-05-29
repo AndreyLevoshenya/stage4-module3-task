@@ -1,9 +1,9 @@
 package com.mjc.school.mapper;
 
-import com.mjc.school.repository.NewsRepository;
-import com.mjc.school.model.Comment;
 import com.mjc.school.dto.CommentDtoRequest;
 import com.mjc.school.dto.CommentDtoResponse;
+import com.mjc.school.model.Comment;
+import com.mjc.school.repository.NewsRepository;
 import org.mapstruct.Context;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -18,6 +18,7 @@ public interface CommentDtoMapper {
     CommentDtoResponse modelToDto(Comment model, @Context NewsDtoMapper newsDtoMapper);
 
     @Mappings({
+            @Mapping(target = "id", ignore = true),
             @Mapping(target = "news", expression = "java(newsRepository.getReferenceById(dtoRequest.getNewsId()))"),
             @Mapping(target = "createDate", ignore = true),
             @Mapping(target = "lastUpdateDate", ignore = true),

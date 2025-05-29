@@ -1,17 +1,17 @@
-package com.mjc.school.impl;
+package com.mjc.school.service.impl;
 
-import com.mjc.school.repository.CommentRepository;
-import com.mjc.school.repository.NewsRepository;
-import com.mjc.school.filter.EntitySpecification;
-import com.mjc.school.model.Comment;
-import com.mjc.school.service.CommentService;
 import com.mjc.school.annotation.Valid;
 import com.mjc.school.dto.CommentDtoRequest;
 import com.mjc.school.dto.CommentDtoResponse;
 import com.mjc.school.dto.SearchingRequest;
 import com.mjc.school.exception.NotFoundException;
+import com.mjc.school.filter.EntitySpecification;
 import com.mjc.school.mapper.CommentDtoMapper;
 import com.mjc.school.mapper.NewsDtoMapper;
+import com.mjc.school.model.Comment;
+import com.mjc.school.repository.CommentRepository;
+import com.mjc.school.repository.NewsRepository;
+import com.mjc.school.service.CommentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +72,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public CommentDtoResponse create(@Valid CommentDtoRequest createRequest) {
-        LOGGER.info("Creating comment with id {}", createRequest.getId());
+        LOGGER.info("Creating comment {}", createRequest.toString());
         if (!newsRepository.existsById(createRequest.getNewsId())) {
             LOGGER.error("News with id {} not found. Unable to create comment", createRequest.getNewsId());
             throw new NotFoundException(String.format(NEWS_DOES_NOT_EXIST.getErrorMessage(), createRequest.getNewsId()));
@@ -83,12 +83,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public CommentDtoResponse update(@Valid CommentDtoRequest updateRequest) {
-        LOGGER.info("Updating comment with id {}", updateRequest.getId());
-        Comment prevComment = commentRepository.findById(updateRequest.getId())
+    public CommentDtoResponse update(@Valid Long id, @Valid CommentDtoRequest updateRequest) {
+        LOGGER.info("Updating comment with id {}", id);
+        Comment prevComment = commentRepository.findById(id)
                 .orElseThrow(() -> {
-                    LOGGER.error("Comment with id {} not found. Unable to update comment", updateRequest.getId());
-                    return new NotFoundException(String.format(COMMENT_DOES_NOT_EXIST.getErrorMessage(), updateRequest.getId()));
+                    LOGGER.error("Comment with id {} not found. Unable to update comment", id);
+                    return new NotFoundException(String.format(COMMENT_DOES_NOT_EXIST.getErrorMessage(), id));
                 });
         prevComment.setContent(updateRequest.getContent());
 
@@ -97,9 +97,8 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public CommentDtoResponse patch(@Valid CommentDtoRequest patchRequest) {
-        LOGGER.info("Patching comment with id {}", patchRequest.getId());
-        Long id = patchRequest.getId();
+    public CommentDtoResponse patch(@Valid Long id, @Valid CommentDtoRequest patchRequest) {
+        LOGGER.info("Patching comment with id {}", id);
         String content = patchRequest.getContent();
 
         Comment prevComment = commentRepository.findById(id)

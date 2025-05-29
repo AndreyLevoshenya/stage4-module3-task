@@ -5,9 +5,6 @@ import com.mjc.school.annotation.NotNull;
 import com.mjc.school.annotation.StringField;
 
 public final class CommentDtoRequest {
-    @IdField
-    private Long id;
-
     @StringField(min = 5, max = 255)
     @NotNull
     private String content;
@@ -18,18 +15,9 @@ public final class CommentDtoRequest {
     public CommentDtoRequest() {
     }
 
-    public CommentDtoRequest(Long id, String content, Long newsId) {
-        this.id = id;
+    public CommentDtoRequest(String content, Long newsId) {
         this.content = content;
         this.newsId = newsId;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getContent() {

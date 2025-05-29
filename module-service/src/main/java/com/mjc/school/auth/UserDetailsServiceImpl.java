@@ -1,8 +1,8 @@
 package com.mjc.school.auth;
 
-import com.mjc.school.repository.UserRepository;
-import com.mjc.school.model.User;
 import com.mjc.school.exception.NotFoundException;
+import com.mjc.school.model.User;
+import com.mjc.school.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

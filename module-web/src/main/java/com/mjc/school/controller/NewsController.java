@@ -1,6 +1,5 @@
-package com.mjc.school.impl;
+package com.mjc.school.controller;
 
-import com.mjc.school.controller.BaseController;
 import com.mjc.school.service.AuthorService;
 import com.mjc.school.service.CommentService;
 import com.mjc.school.service.NewsService;
@@ -140,8 +139,7 @@ public class NewsController implements BaseController<NewsDtoRequest, NewsDtoRes
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<NewsDtoResponse> update(@PathVariable Long id, @RequestBody NewsDtoRequest updateRequest) {
-        updateRequest.setId(id);
-        NewsDtoResponse newsDtoResponse = newsService.update(updateRequest);
+        NewsDtoResponse newsDtoResponse = newsService.update(id, updateRequest);
         setLinks(newsDtoResponse);
         return new ResponseEntity<>(newsDtoResponse, OK);
     }
@@ -158,8 +156,7 @@ public class NewsController implements BaseController<NewsDtoRequest, NewsDtoRes
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<NewsDtoResponse> patch(@PathVariable Long id, @RequestBody NewsDtoRequest updateRequest) {
-        updateRequest.setId(id);
-        NewsDtoResponse newsDtoResponse = newsService.patch(updateRequest);
+        NewsDtoResponse newsDtoResponse = newsService.patch(id, updateRequest);
         setLinks(newsDtoResponse);
         return new ResponseEntity<>(newsDtoResponse, OK);
     }

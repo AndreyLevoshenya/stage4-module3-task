@@ -1,10 +1,9 @@
-package com.mjc.school.impl;
+package com.mjc.school.controller;
 
-import com.mjc.school.controller.BaseController;
-import com.mjc.school.service.TagService;
 import com.mjc.school.dto.SearchingRequest;
 import com.mjc.school.dto.TagDtoRequest;
 import com.mjc.school.dto.TagDtoResponse;
+import com.mjc.school.service.TagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -120,8 +119,7 @@ public class TagController implements BaseController<TagDtoRequest, TagDtoRespon
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<TagDtoResponse> update(@PathVariable Long id, @RequestBody TagDtoRequest updateRequest) {
-        updateRequest.setId(id);
-        TagDtoResponse tagDtoResponse = tagService.update(updateRequest);
+        TagDtoResponse tagDtoResponse = tagService.update(id, updateRequest);
         Link selfRel = linkTo(TagController.class).slash(tagDtoResponse.getId()).withSelfRel();
         tagDtoResponse.add(selfRel);
         return new ResponseEntity<>(tagDtoResponse, OK);
@@ -139,8 +137,7 @@ public class TagController implements BaseController<TagDtoRequest, TagDtoRespon
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<TagDtoResponse> patch(@PathVariable Long id, @RequestBody TagDtoRequest updateRequest) {
-        updateRequest.setId(id);
-        TagDtoResponse tagDtoResponse = tagService.patch(updateRequest);
+        TagDtoResponse tagDtoResponse = tagService.patch(id, updateRequest);
         Link selfRel = linkTo(TagController.class).slash(tagDtoResponse.getId()).withSelfRel();
         tagDtoResponse.add(selfRel);
         return new ResponseEntity<>(tagDtoResponse, OK);

@@ -7,9 +7,6 @@ import com.mjc.school.annotation.StringField;
 import java.util.List;
 
 public final class NewsDtoRequest {
-    @IdField
-    private Long id;
-
     @StringField(min = 5, max = 30)
     @NotNull
     private String title;
@@ -27,20 +24,11 @@ public final class NewsDtoRequest {
     public NewsDtoRequest() {
     }
 
-    public NewsDtoRequest(Long id, String title, String content, Long authorId, List<Long> tagIds) {
-        this.id = id;
+    public NewsDtoRequest(String title, String content, Long authorId, List<Long> tagIds) {
         this.title = title;
         this.content = content;
         this.authorId = authorId;
         this.tagIds = tagIds;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getTitle() {

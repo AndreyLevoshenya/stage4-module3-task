@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -17,14 +18,24 @@ import static com.mjc.school.exception.ExceptionErrorCodes.VALIDATION_EXCEPTION;
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
-    public static final String RECORD_UNIQUENESS_RESTRICTION_MESSAGE = "A repeated field value violates the record uniqueness restriction";
-
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<Object> handleValidationException(ValidationException e) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         ApiException apiException = new ApiException(
                 VALIDATION_EXCEPTION.getErrorCode(),
-                e.getMessage(),
+                e.getLocalizedMessage(),
+                status,
+                LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
+        );
+        return new ResponseEntity<>(apiException, status);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Object> handleValidationException(MethodArgumentTypeMismatchException e) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ApiException apiException = new ApiException(
+                METHOD_ARGUMENT_TYPE_MISMATCH_EXCEPTION.getErrorCode(),
+                String.format(METHOD_ARGUMENT_TYPE_MISMATCH_EXCEPTION.getErrorMessage(), e.getMessage()),
                 status,
                 LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
         );
@@ -59,8 +70,8 @@ public class ApiExceptionHandler {
     public ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         ApiException apiException = new ApiException(
-                VALIDATION_EXCEPTION.getErrorCode(),
-                RECORD_UNIQUENESS_RESTRICTION_MESSAGE + ". " + e.getMessage(),
+                ENTITY_ALREADY_EXISTS.getErrorCode(),
+                ENTITY_ALREADY_EXISTS.getErrorMessage().formatted(e.getMessage()),
                 status,
                 LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS)
         );

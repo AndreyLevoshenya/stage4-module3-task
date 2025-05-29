@@ -150,7 +150,7 @@ class TagControllerIntegrationTest {
     }
 
     @Test
-    void givenValidRequestAndUserRole_whenCreateTag_thenReturn401() {
+    void givenValidRequestAndUserRole_whenCreateTag_thenReturn403() {
         String token = obtainJwtToken("test", "test");
         TagDtoRequest request = new TagDtoRequest();
         request.setName("New Tag");
@@ -163,7 +163,7 @@ class TagControllerIntegrationTest {
                 .when()
                 .post("/api/v1/tags")
                 .then()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @Test
@@ -171,7 +171,7 @@ class TagControllerIntegrationTest {
         given()
                 .contentType(ContentType.JSON)
                 .headers(Map.of())
-                .body(new TagDtoRequest(null, "NoAuth Tag"))
+                .body(new TagDtoRequest("NoAuth Tag"))
                 .when()
                 .post("/api/v1/tags")
                 .then()
@@ -215,7 +215,7 @@ class TagControllerIntegrationTest {
     }
 
     @Test
-    void givenUpdateRequestAndUserRole_whenUpdateTag_thenReturn401() {
+    void givenUpdateRequestAndUserRole_whenUpdateTag_thenReturn403() {
         String token = obtainJwtToken("test", "test");
 
         TagDtoRequest request = new TagDtoRequest();
@@ -229,7 +229,7 @@ class TagControllerIntegrationTest {
                 .when()
                 .put("/api/v1/tags/{id}", 1)
                 .then()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @Test
@@ -305,7 +305,7 @@ class TagControllerIntegrationTest {
     }
 
     @Test
-    void givenPatchRequestAndUserRole_whenPatchTag_thenReturn401() {
+    void givenPatchRequestAndUserRole_whenPatchTag_thenReturn403() {
         String token = obtainJwtToken("test", "test");
 
         TagDtoRequest request = new TagDtoRequest();
@@ -319,7 +319,7 @@ class TagControllerIntegrationTest {
                 .when()
                 .patch("/api/v1/tags/{id}", 1)
                 .then()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @Test
@@ -387,7 +387,7 @@ class TagControllerIntegrationTest {
     }
 
     @Test
-    void givenUserRoleAuth_whenDeleteTag_thenReturn401() {
+    void givenUserRoleAuth_whenDeleteTag_thenReturn403() {
         Long tagId = 4L;
         String token = obtainJwtToken("test", "test");
 
@@ -397,7 +397,7 @@ class TagControllerIntegrationTest {
                 .when()
                 .delete("/api/v1/tags/{id}", tagId)
                 .then()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @Test

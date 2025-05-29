@@ -1,11 +1,10 @@
-package com.mjc.school.impl;
+package com.mjc.school.controller;
 
-import com.mjc.school.controller.BaseController;
-import com.mjc.school.service.CommentService;
 import com.mjc.school.dto.CommentDtoRequest;
 import com.mjc.school.dto.CommentDtoResponse;
 import com.mjc.school.dto.SearchingRequest;
 import com.mjc.school.dto.TagDtoResponse;
+import com.mjc.school.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -131,8 +130,7 @@ public class CommentController implements BaseController<CommentDtoRequest, Comm
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<CommentDtoResponse> update(@PathVariable Long id, @RequestBody CommentDtoRequest updateRequest) {
-        updateRequest.setId(id);
-        CommentDtoResponse commentDtoResponse = commentService.update(updateRequest);
+        CommentDtoResponse commentDtoResponse = commentService.update(id, updateRequest);
         setLinks(commentDtoResponse);
         return new ResponseEntity<>(commentDtoResponse, OK);
     }
@@ -149,8 +147,7 @@ public class CommentController implements BaseController<CommentDtoRequest, Comm
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<CommentDtoResponse> patch(@PathVariable Long id, @RequestBody CommentDtoRequest updateRequest) {
-        updateRequest.setId(id);
-        CommentDtoResponse commentDtoResponse = commentService.patch(updateRequest);
+        CommentDtoResponse commentDtoResponse = commentService.patch(id, updateRequest);
         setLinks(commentDtoResponse);
         return new ResponseEntity<>(commentDtoResponse, OK);
     }

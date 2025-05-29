@@ -154,7 +154,7 @@ class AuthorControllerIntegrationTest {
     }
 
     @Test
-    void givenUserRoleAuth_whenCreateAuthor_thenReturn401() {
+    void givenUserRoleAuth_whenCreateAuthor_thenReturn403() {
         String token = obtainJwtToken("test", "test");
         AuthorDtoRequest request = new AuthorDtoRequest();
         request.setName("New Author");
@@ -167,7 +167,7 @@ class AuthorControllerIntegrationTest {
                 .when()
                 .post("/api/v1/authors")
                 .then()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @Test
@@ -175,7 +175,7 @@ class AuthorControllerIntegrationTest {
         given()
                 .contentType(ContentType.JSON)
                 .headers(Map.of())
-                .body(new AuthorDtoRequest(null, "NoAuth Author"))
+                .body(new AuthorDtoRequest("NoAuth Author"))
                 .when()
                 .post("/api/v1/authors")
                 .then()
@@ -221,7 +221,7 @@ class AuthorControllerIntegrationTest {
     }
 
     @Test
-    void givenUserRoleAuth_whenUpdateAuthor_thenReturn401() {
+    void givenUserRoleAuth_whenUpdateAuthor_thenReturn403() {
         String token = obtainJwtToken("test", "test");
 
         AuthorDtoRequest request = new AuthorDtoRequest();
@@ -235,7 +235,7 @@ class AuthorControllerIntegrationTest {
                 .when()
                 .put("/api/v1/authors/{id}", 1)
                 .then()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @Test
@@ -313,7 +313,7 @@ class AuthorControllerIntegrationTest {
     }
 
     @Test
-    void givenUserRoleAuth_whenPatchAuthor_thenReturn401() {
+    void givenUserRoleAuth_whenPatchAuthor_thenReturn403() {
         String token = obtainJwtToken("test", "test");
 
         AuthorDtoRequest request = new AuthorDtoRequest();
@@ -327,7 +327,7 @@ class AuthorControllerIntegrationTest {
                 .when()
                 .patch("/api/v1/authors/{id}", 1)
                 .then()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @Test
@@ -395,7 +395,7 @@ class AuthorControllerIntegrationTest {
     }
 
     @Test
-    void givenUserRoleAuth_whenDeleteAuthor_thenReturn401() {
+    void givenUserRoleAuth_whenDeleteAuthor_thenReturn403() {
         Long authorId = 4L;
         String token = obtainJwtToken("test", "test");
 
@@ -405,7 +405,7 @@ class AuthorControllerIntegrationTest {
                 .when()
                 .delete("/api/v1/authors/{id}", authorId)
                 .then()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @Test

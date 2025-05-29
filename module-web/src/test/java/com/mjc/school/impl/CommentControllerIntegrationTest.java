@@ -15,7 +15,6 @@ import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -163,7 +162,7 @@ class CommentControllerIntegrationTest {
         given()
                 .contentType(ContentType.JSON)
                 .headers(Map.of())
-                .body(new CommentDtoRequest(null, "NoAuth Comment", 1L))
+                .body(new CommentDtoRequest("NoAuth Comment", 1L))
                 .when()
                 .post("/api/v1/comments")
                 .then()
@@ -210,7 +209,7 @@ class CommentControllerIntegrationTest {
     }
 
     @Test
-    void givenUserRole_whenUpdateComment_thenReturn401() {
+    void givenUserRole_whenUpdateComment_thenReturn403() {
         String token = obtainJwtToken("test", "test");
 
         CommentDtoRequest request = new CommentDtoRequest();
@@ -225,7 +224,7 @@ class CommentControllerIntegrationTest {
                 .when()
                 .put("/api/v1/comments/{id}", 1)
                 .then()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @Test
@@ -304,7 +303,7 @@ class CommentControllerIntegrationTest {
     }
 
     @Test
-    void givenUserRole_whenPatchComment_thenReturn401() {
+    void givenUserRole_whenPatchComment_thenReturn403() {
         String token = obtainJwtToken("test", "test");
 
         CommentDtoRequest request = new CommentDtoRequest();
@@ -319,7 +318,7 @@ class CommentControllerIntegrationTest {
                 .when()
                 .patch("/api/v1/comments/{id}", 1)
                 .then()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @Test
@@ -389,7 +388,7 @@ class CommentControllerIntegrationTest {
     }
 
     @Test
-    void givenUserRole_whenDeleteComment_thenReturn401() {
+    void givenUserRole_whenDeleteComment_thenReturn403() {
         Long commentId = 4L;
         String token = obtainJwtToken("test", "test");
 
@@ -399,7 +398,7 @@ class CommentControllerIntegrationTest {
                 .when()
                 .delete("/api/v1/comments/{id}", commentId)
                 .then()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @Test

@@ -172,7 +172,7 @@ class NewsControllerIntegrationTest {
         given()
                 .contentType(ContentType.JSON)
                 .headers(Map.of())
-                .body(new NewsDtoRequest(null, "news title", "content of a news", 1L, List.of()))
+                .body(new NewsDtoRequest("news title", "content of a news", 1L, List.of()))
                 .when()
                 .post("/api/v1/news")
                 .then()
@@ -227,7 +227,7 @@ class NewsControllerIntegrationTest {
     }
 
     @Test
-    void givenUserHasNoAdminRole_whenUpdateNews_thenReturn401() {
+    void givenUserHasNoAdminRole_whenUpdateNews_thenReturn403() {
         String token = obtainJwtToken("test", "test");
 
         NewsDtoRequest request = new NewsDtoRequest();
@@ -244,7 +244,7 @@ class NewsControllerIntegrationTest {
                 .when()
                 .put("/api/v1/news/{id}", 3)
                 .then()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @Test
@@ -330,7 +330,7 @@ class NewsControllerIntegrationTest {
     }
 
     @Test
-    void givenUserHasNoAdminRole_whenPatchNews_thenReturn401() {
+    void givenUserHasNoAdminRole_whenPatchNews_thenReturn403() {
         String token = obtainJwtToken("test", "test");
 
         NewsDtoRequest request = new NewsDtoRequest();
@@ -344,7 +344,7 @@ class NewsControllerIntegrationTest {
                 .when()
                 .patch("/api/v1/news/{id}", 4)
                 .then()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @Test
@@ -394,7 +394,7 @@ class NewsControllerIntegrationTest {
     }
 
     @Test
-    void givenUserRole_whenDeleteNews_thenReturn401() {
+    void givenUserRole_whenDeleteNews_thenReturn403() {
         Long newsId = 4L;
         String token = obtainJwtToken("test", "test");
 
@@ -404,7 +404,7 @@ class NewsControllerIntegrationTest {
                 .when()
                 .delete("/api/v1/news/{id}", newsId)
                 .then()
-                .statusCode(401);
+                .statusCode(403);
     }
 
     @Test

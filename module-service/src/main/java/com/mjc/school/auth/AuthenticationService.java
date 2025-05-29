@@ -1,12 +1,12 @@
 package com.mjc.school.auth;
 
-import com.mjc.school.repository.UserRepository;
-import com.mjc.school.model.Role;
-import com.mjc.school.model.User;
 import com.mjc.school.dto.AuthenticationRequest;
 import com.mjc.school.dto.AuthenticationResponse;
 import com.mjc.school.dto.RegisterRequest;
 import com.mjc.school.exception.NotFoundException;
+import com.mjc.school.model.Role;
+import com.mjc.school.model.User;
+import com.mjc.school.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

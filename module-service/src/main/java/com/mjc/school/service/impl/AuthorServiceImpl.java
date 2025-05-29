@@ -1,15 +1,15 @@
-package com.mjc.school.impl;
+package com.mjc.school.service.impl;
 
-import com.mjc.school.repository.AuthorRepository;
-import com.mjc.school.filter.EntitySpecification;
-import com.mjc.school.model.Author;
-import com.mjc.school.service.AuthorService;
 import com.mjc.school.annotation.Valid;
 import com.mjc.school.dto.AuthorDtoRequest;
 import com.mjc.school.dto.AuthorDtoResponse;
 import com.mjc.school.dto.SearchingRequest;
 import com.mjc.school.exception.NotFoundException;
+import com.mjc.school.filter.EntitySpecification;
 import com.mjc.school.mapper.AuthorDtoMapper;
+import com.mjc.school.model.Author;
+import com.mjc.school.repository.AuthorRepository;
+import com.mjc.school.service.AuthorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +66,7 @@ public class AuthorServiceImpl implements AuthorService {
     @Override
     @Transactional
     public AuthorDtoResponse create(@Valid AuthorDtoRequest createRequest) {
-        LOGGER.info("Creating author {}", createRequest.getName());
+        LOGGER.info("Creating author {}", createRequest.toString());
 
         Author model = authorDtoMapper.dtoToModel(createRequest);
         Author author = authorRepository.save(model);
@@ -75,13 +75,13 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     @Transactional
-    public AuthorDtoResponse update(@Valid AuthorDtoRequest updateRequest) {
-        LOGGER.info("Updating author with id {}", updateRequest.getId());
+    public AuthorDtoResponse update(@Valid Long id, @Valid AuthorDtoRequest updateRequest) {
+        LOGGER.info("Updating author with id {}", id);
 
-        Author author = authorRepository.findById(updateRequest.getId())
+        Author author = authorRepository.findById(id)
                 .orElseThrow(() -> {
-                    LOGGER.warn("Author with id {} not found. Unable to update author", updateRequest.getId());
-                    return new NotFoundException(String.format(AUTHOR_DOES_NOT_EXIST.getErrorMessage(), updateRequest.getId()));
+                    LOGGER.warn("Author with id {} not found. Unable to update author", id);
+                    return new NotFoundException(String.format(AUTHOR_DOES_NOT_EXIST.getErrorMessage(), id));
                 });
 
         author.setName(updateRequest.getName());
@@ -90,9 +90,8 @@ public class AuthorServiceImpl implements AuthorService {
 
     @Override
     @Transactional
-    public AuthorDtoResponse patch(@Valid AuthorDtoRequest patchRequest) {
-        LOGGER.info("Patching author with id {}", patchRequest.getId());
-        Long id = patchRequest.getId();
+    public AuthorDtoResponse patch(@Valid Long id, @Valid AuthorDtoRequest patchRequest) {
+        LOGGER.info("Patching author with id {}", id);
         String name = patchRequest.getName();
 
         Author prevAuthor = authorRepository.findById(id)

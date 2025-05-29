@@ -1,21 +1,21 @@
-package com.mjc.school.impl;
+package com.mjc.school.service.impl;
 
-import com.mjc.school.repository.AuthorRepository;
-import com.mjc.school.repository.NewsRepository;
-import com.mjc.school.repository.TagRepository;
-import com.mjc.school.filter.EntitySpecification;
-import com.mjc.school.model.Author;
-import com.mjc.school.model.News;
-import com.mjc.school.model.SearchParameters;
-import com.mjc.school.model.Tag;
-import com.mjc.school.service.NewsService;
 import com.mjc.school.annotation.Valid;
 import com.mjc.school.dto.NewsDtoRequest;
 import com.mjc.school.dto.NewsDtoResponse;
 import com.mjc.school.dto.ParametersDtoRequest;
 import com.mjc.school.dto.SearchingRequest;
 import com.mjc.school.exception.NotFoundException;
+import com.mjc.school.filter.EntitySpecification;
 import com.mjc.school.mapper.NewsDtoMapper;
+import com.mjc.school.model.Author;
+import com.mjc.school.model.News;
+import com.mjc.school.model.SearchParameters;
+import com.mjc.school.model.Tag;
+import com.mjc.school.repository.AuthorRepository;
+import com.mjc.school.repository.NewsRepository;
+import com.mjc.school.repository.TagRepository;
+import com.mjc.school.service.NewsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,24 +77,24 @@ public class NewsServiceImpl implements NewsService {
     @Override
     @Transactional
     public NewsDtoResponse create(@Valid NewsDtoRequest createRequest) {
-        LOGGER.info("Creating new news {}", createRequest);
+        LOGGER.info("Creating new news {}", createRequest.toString());
         if (!authorRepository.existsById(createRequest.getAuthorId())) {
             LOGGER.error("Author with id {} not found. Unable to create news", createRequest.getAuthorId());
             throw new NotFoundException(String.format(AUTHOR_DOES_NOT_EXIST.getErrorMessage(), createRequest.getAuthorId()));
         }
-        News model = newsDtoMapper.dtoToModel(createRequest, newsRepository, authorRepository, tagRepository);
+        News model = newsDtoMapper.dtoToModel(createRequest, authorRepository, tagRepository);
         return newsDtoMapper.modelToDto(newsRepository.save(model));
     }
 
     @Override
     @Transactional
-    public NewsDtoResponse update(@Valid NewsDtoRequest updateRequest) {
-        LOGGER.info("Updating news with id {}", updateRequest.getId());
+    public NewsDtoResponse update(@Valid Long id, @Valid NewsDtoRequest updateRequest) {
+        LOGGER.info("Updating news with id {}", id);
 
-        News news = newsRepository.findById(updateRequest.getId())
+        News news = newsRepository.findById(id)
                 .orElseThrow(() -> {
-                    LOGGER.error("News with id {} not found. Unable to update news", updateRequest.getId());
-                    return new NotFoundException(String.format(NEWS_DOES_NOT_EXIST.getErrorMessage(), updateRequest.getId()));
+                    LOGGER.error("News with id {} not found. Unable to update news", id);
+                    return new NotFoundException(String.format(NEWS_DOES_NOT_EXIST.getErrorMessage(), id));
                 });
 
         Author author = authorRepository.findById(updateRequest.getAuthorId())
@@ -104,13 +104,15 @@ public class NewsServiceImpl implements NewsService {
                 });
 
         List<Tag> tags = new ArrayList<>();
-        for (Long tagId : updateRequest.getTagIds()) {
-            Tag tag = tagRepository.findById(tagId)
-                    .orElseThrow(() -> {
-                        LOGGER.error("Tag with id {} not found. Unable to update news", tagId);
-                        return new NotFoundException(String.format(TAG_DOES_NOT_EXIST.getErrorMessage(), tagId));
-                    });
-            tags.add(tag);
+        if (updateRequest.getTagIds() != null) {
+            for (Long tagId : updateRequest.getTagIds()) {
+                Tag tag = tagRepository.findById(tagId)
+                        .orElseThrow(() -> {
+                            LOGGER.error("Tag with id {} not found. Unable to update news", tagId);
+                            return new NotFoundException(String.format(TAG_DOES_NOT_EXIST.getErrorMessage(), tagId));
+                        });
+                tags.add(tag);
+            }
         }
 
         news.setTitle(updateRequest.getTitle());
@@ -124,9 +126,8 @@ public class NewsServiceImpl implements NewsService {
 
     @Override
     @Transactional
-    public NewsDtoResponse patch(NewsDtoRequest patchRequest) {
-        LOGGER.info("Patching news with id {}", patchRequest);
-        Long id = patchRequest.getId();
+    public NewsDtoResponse patch(@Valid Long id, NewsDtoRequest patchRequest) {
+        LOGGER.info("Patching news with id {}", id);
         String title = patchRequest.getTitle();
         String content = patchRequest.getContent();
         Long authorId = patchRequest.getAuthorId();
@@ -152,15 +153,14 @@ public class NewsServiceImpl implements NewsService {
                     });
             prevNews.setAuthor(author);
         }
-
         if (tagIds != null) {
-            List<Tag> tags = tagRepository.findAll();
-            for (Long tagId : tagIds) {
-                if(!tagRepository.existsById(tagId)) {
-                    LOGGER.error("Tag with id {} not found. Unable to patch news", tagId);
-                    throw new NotFoundException(String.format(TAG_DOES_NOT_EXIST.getErrorMessage(), tagId));
-                }
-            }
+            List<Tag> tags = tagIds.stream()
+                    .map(tagId -> tagRepository.findById(tagId)
+                            .orElseThrow(() -> {
+                                LOGGER.error("Tag with id {} not found. Unable to patch news", tagId);
+                                return new NotFoundException(String.format(TAG_DOES_NOT_EXIST.getErrorMessage(), tagId));
+                            }))
+                    .toList();
             prevNews.setTags(tags);
         }
 

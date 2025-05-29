@@ -1,10 +1,9 @@
-package com.mjc.school.impl;
+package com.mjc.school.controller;
 
-import com.mjc.school.controller.BaseController;
-import com.mjc.school.service.AuthorService;
 import com.mjc.school.dto.AuthorDtoRequest;
 import com.mjc.school.dto.AuthorDtoResponse;
 import com.mjc.school.dto.SearchingRequest;
+import com.mjc.school.service.AuthorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -120,8 +119,7 @@ public class AuthorController implements BaseController<AuthorDtoRequest, Author
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<AuthorDtoResponse> update(@PathVariable Long id, @RequestBody AuthorDtoRequest updateRequest) {
-        updateRequest.setId(id);
-        AuthorDtoResponse authorDtoResponse = authorService.update(updateRequest);
+        AuthorDtoResponse authorDtoResponse = authorService.update(id, updateRequest);
         Link selfRel = linkTo(AuthorController.class).slash(id).withSelfRel();
         authorDtoResponse.add(selfRel);
         return new ResponseEntity<>(authorDtoResponse, OK);
@@ -139,8 +137,7 @@ public class AuthorController implements BaseController<AuthorDtoRequest, Author
     @ResponseStatus(OK)
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<AuthorDtoResponse> patch(@PathVariable Long id, @RequestBody AuthorDtoRequest updateRequest) {
-        updateRequest.setId(id);
-        AuthorDtoResponse authorDtoResponse = authorService.patch(updateRequest);
+        AuthorDtoResponse authorDtoResponse = authorService.patch(id, updateRequest);
         Link selfRel = linkTo(AuthorController.class).slash(id).withSelfRel();
         authorDtoResponse.add(selfRel);
         return new ResponseEntity<>(authorDtoResponse, OK);

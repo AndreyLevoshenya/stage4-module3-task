@@ -1,4 +1,4 @@
-package com.mjc.school.impl;
+package com.mjc.school.service.impl;
 
 import com.mjc.school.dto.AuthorDtoResponse;
 import com.mjc.school.dto.NewsDtoRequest;
@@ -86,12 +86,12 @@ class NewsServiceImplTest {
     @Test
     void create_shouldSaveNews_whenAuthorExists() {
         LocalDateTime dateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-        NewsDtoRequest request = new NewsDtoRequest(null, "title", "content", 1L, null);
+        NewsDtoRequest request = new NewsDtoRequest("title", "content", 1L, null);
         News news = new News("title", "content", dateTime, dateTime, null, null, null);
         news.setAuthor(new Author());
         news.getAuthor().setId(1L);
         when(authorRepository.existsById(1L)).thenReturn(true);
-        when(newsDtoMapper.dtoToModel(any(), any(), any(), any())).thenReturn(news);
+        when(newsDtoMapper.dtoToModel(any(), any(), any())).thenReturn(news);
         when(newsRepository.save(news)).thenReturn(news);
         when(newsDtoMapper.modelToDto(news)).thenReturn(new NewsDtoResponse());
 
@@ -116,7 +116,6 @@ class NewsServiceImplTest {
     @Test
     void update_shouldUpdateNews_whenValid() {
         NewsDtoRequest request = new NewsDtoRequest();
-        request.setId(1L);
         request.setAuthorId(2L);
         request.setTagIds(List.of(3L));
         News news = new News();
@@ -128,7 +127,7 @@ class NewsServiceImplTest {
         when(newsRepository.save(news)).thenReturn(news);
         when(newsDtoMapper.modelToDto(news)).thenReturn(new NewsDtoResponse());
 
-        NewsDtoResponse result = newsService.update(request);
+        NewsDtoResponse result = newsService.update(1L, request);
 
         assertThat(result).isNotNull();
     }
@@ -136,30 +135,27 @@ class NewsServiceImplTest {
     @Test
     void update_shouldThrow_whenNewsNotExists() {
         NewsDtoRequest request = new NewsDtoRequest();
-        request.setId(1L);
         when(newsRepository.findById(1L)).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> newsService.update(request));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> newsService.update(1L, request));
         assertEquals(exception.getMessage(), String.format(NEWS_DOES_NOT_EXIST.getErrorMessage(), 1L));
     }
 
     @Test
     void update_shouldThrow_whenAuthorNotExists() {
         NewsDtoRequest request = new NewsDtoRequest();
-        request.setId(1L);
         request.setAuthorId(2L);
 
         when(newsRepository.findById(1L)).thenReturn(Optional.of(new News()));
         when(authorRepository.findById(2L)).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> newsService.update(request));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> newsService.update(1L, request));
         assertEquals(exception.getMessage(), String.format(AUTHOR_DOES_NOT_EXIST.getErrorMessage(), 2L));
     }
 
     @Test
     void update_shouldThrow_whenTagNotExists() {
         NewsDtoRequest request = new NewsDtoRequest();
-        request.setId(1L);
         request.setAuthorId(2L);
         request.setTagIds(List.of(3L));
 
@@ -167,7 +163,7 @@ class NewsServiceImplTest {
         when(authorRepository.findById(2L)).thenReturn(Optional.of(new Author()));
         when(tagRepository.findById(3L)).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> newsService.update(request));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> newsService.update(1L, request));
         assertEquals(exception.getMessage(), String.format(TAG_DOES_NOT_EXIST.getErrorMessage(), 3L));
     }
 
@@ -175,12 +171,11 @@ class NewsServiceImplTest {
     @Test
     void patch_whenNewsNotFound_throwsNotFoundException() {
         NewsDtoRequest patchRequest = new NewsDtoRequest();
-        patchRequest.setId(10L);
 
         when(newsRepository.findById(10L)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> newsService.patch(patchRequest));
+                () -> newsService.patch(10L, patchRequest));
 
         assertTrue(exception.getMessage().contains("does not exist"));
         verify(newsRepository).findById(10L);
@@ -190,7 +185,6 @@ class NewsServiceImplTest {
     @Test
     void patch_whenAllFieldsNull_shouldNotChangeExistingNewsFields() {
         NewsDtoRequest patchRequest = new NewsDtoRequest();
-        patchRequest.setId(10L);
         patchRequest.setTitle(null);
         patchRequest.setContent(null);
         patchRequest.setAuthorId(null);
@@ -208,7 +202,7 @@ class NewsServiceImplTest {
         when(newsRepository.save(existingNews)).thenReturn(existingNews);
         when(newsDtoMapper.modelToDto(existingNews)).thenReturn(expectedResponse);
 
-        NewsDtoResponse actual = newsService.patch(patchRequest);
+        NewsDtoResponse actual = newsService.patch(10L, patchRequest);
 
         assertSame(expectedResponse, actual);
 
@@ -227,7 +221,6 @@ class NewsServiceImplTest {
     @Test
     void patch_whenTitleAndContentProvided_shouldUpdateThem() {
         NewsDtoRequest patchRequest = new NewsDtoRequest();
-        patchRequest.setId(10L);
         patchRequest.setTitle("New title");
         patchRequest.setContent("New content");
 
@@ -243,7 +236,7 @@ class NewsServiceImplTest {
         when(newsRepository.save(existingNews)).thenReturn(existingNews);
         when(newsDtoMapper.modelToDto(existingNews)).thenReturn(expectedResponse);
 
-        NewsDtoResponse actual = newsService.patch(patchRequest);
+        NewsDtoResponse actual = newsService.patch(10L, patchRequest);
 
         assertSame(expectedResponse, actual);
         assertEquals("New title", existingNews.getTitle());
@@ -258,7 +251,6 @@ class NewsServiceImplTest {
     @Test
     void patch_whenAuthorIdProvided_andAuthorExists_shouldUpdateAuthor() {
         NewsDtoRequest patchRequest = new NewsDtoRequest();
-        patchRequest.setId(10L);
         patchRequest.setAuthorId(2L);
 
         LocalDateTime dateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
@@ -274,7 +266,7 @@ class NewsServiceImplTest {
         when(newsRepository.save(existingNews)).thenReturn(existingNews);
         when(newsDtoMapper.modelToDto(existingNews)).thenReturn(expectedResponse);
 
-        NewsDtoResponse actual = newsService.patch(patchRequest);
+        NewsDtoResponse actual = newsService.patch(10L, patchRequest);
 
         assertSame(expectedResponse, actual);
         assertEquals(newAuthor, existingNews.getAuthor());
@@ -289,7 +281,6 @@ class NewsServiceImplTest {
     @Test
     void patch_whenAuthorIdProvided_andAuthorNotFound_shouldThrow() {
         NewsDtoRequest patchRequest = new NewsDtoRequest();
-        patchRequest.setId(10L);
         patchRequest.setAuthorId(999L);
 
         LocalDateTime dateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
@@ -300,7 +291,7 @@ class NewsServiceImplTest {
         when(authorRepository.findById(999L)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> newsService.patch(patchRequest));
+                () -> newsService.patch(10L, patchRequest));
 
         assertEquals(exception.getMessage(), String.format(AUTHOR_DOES_NOT_EXIST.getErrorMessage(), 999L));
 
@@ -312,7 +303,6 @@ class NewsServiceImplTest {
     @Test
     void patch_whenTagIdsProvided_andAllTagsExist_shouldUpdateTags() {
         NewsDtoRequest patchRequest = new NewsDtoRequest();
-        patchRequest.setId(10L);
         patchRequest.setTagIds(List.of(1L, 2L));
 
         List<Tag> tagsFromDb = List.of(new Tag("tag1"), new Tag("tag2"));
@@ -325,21 +315,19 @@ class NewsServiceImplTest {
         existingNews.setId(10L);
 
         when(newsRepository.findById(10L)).thenReturn(Optional.of(existingNews));
-        when(tagRepository.findAll()).thenReturn(tagsFromDb);
         when(newsRepository.save(existingNews)).thenReturn(existingNews);
         when(newsDtoMapper.modelToDto(existingNews)).thenReturn(expectedResponse);
-        when(tagRepository.existsById(1L)).thenReturn(true);
-        when(tagRepository.existsById(2L)).thenReturn(true);
+        when(tagRepository.findById(1L)).thenReturn(Optional.of(tagsFromDb.get(0)));
+        when(tagRepository.findById(2L)).thenReturn(Optional.of(tagsFromDb.get(1)));
 
-        NewsDtoResponse actual = newsService.patch(patchRequest);
+        NewsDtoResponse actual = newsService.patch(10L, patchRequest);
 
         assertSame(expectedResponse, actual);
         assertEquals(tagsFromDb, existingNews.getTags());
 
         verify(newsRepository).findById(10L);
-        verify(tagRepository).findAll();
-        verify(tagRepository).existsById(1L);
-        verify(tagRepository).existsById(2L);
+        verify(tagRepository).findById(1L);
+        verify(tagRepository).findById(2L);
         verify(newsRepository).save(existingNews);
         verify(newsDtoMapper).modelToDto(existingNews);
         verifyNoInteractions(authorRepository);
@@ -348,7 +336,6 @@ class NewsServiceImplTest {
     @Test
     void patch_whenTagIdsProvided_andSomeTagsMissing_shouldThrow() {
         NewsDtoRequest patchRequest = new NewsDtoRequest();
-        patchRequest.setId(10L);
         patchRequest.setTagIds(List.of(1L, 2L));
 
         List<Tag> incompleteTagsList = List.of(new Tag("tag1"));
@@ -359,19 +346,17 @@ class NewsServiceImplTest {
         existingNews.setId(10L);
 
         when(newsRepository.findById(10L)).thenReturn(Optional.of(existingNews));
-        when(tagRepository.findAll()).thenReturn(incompleteTagsList);
-        when(tagRepository.existsById(1L)).thenReturn(true);
-        when(tagRepository.existsById(2L)).thenReturn(false);
+        when(tagRepository.findById(1L)).thenReturn(Optional.of(incompleteTagsList.get(0)));
+        when(tagRepository.findById(2L)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> newsService.patch(patchRequest));
+                () -> newsService.patch(10L, patchRequest));
 
         assertEquals(String.format(TAG_DOES_NOT_EXIST.getErrorMessage(), 2L), exception.getMessage());
 
         verify(newsRepository).findById(10L);
-        verify(tagRepository).findAll();
-        verify(tagRepository).existsById(1L);
-        verify(tagRepository).existsById(2L);
+        verify(tagRepository).findById(1L);
+        verify(tagRepository).findById(2L);
         verifyNoMoreInteractions(newsRepository, authorRepository, tagRepository, newsDtoMapper);
     }
 

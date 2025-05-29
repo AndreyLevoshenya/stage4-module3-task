@@ -1,4 +1,4 @@
-package com.mjc.school.impl;
+package com.mjc.school.service.impl;
 
 import com.mjc.school.dto.SearchingRequest;
 import com.mjc.school.dto.TagDtoRequest;
@@ -115,7 +115,7 @@ class TagServiceImplTest {
     @Test
     void create_shouldSaveAndReturnTagDto() {
         Long id = 1L;
-        TagDtoRequest createRequest = new TagDtoRequest(null, "Name");
+        TagDtoRequest createRequest = new TagDtoRequest("Name");
         Tag model = new Tag("Name");
         Tag savedTag = new Tag("Name");
         savedTag.setId(id);
@@ -137,7 +137,6 @@ class TagServiceImplTest {
     void update_shouldReturnUpdatedTagDto_whenTagExists() {
         Long id = 1L;
         TagDtoRequest updateRequest = new TagDtoRequest();
-        updateRequest.setId(id);
         updateRequest.setName("Updated Name");
 
         Tag tag = new Tag("Updated Name");
@@ -150,7 +149,7 @@ class TagServiceImplTest {
         when(tagRepository.save(tag)).thenReturn(savedTag);
         when(tagDtoMapper.modelToDto(savedTag)).thenReturn(expectedDto);
 
-        TagDtoResponse actualDto = tagService.update(updateRequest);
+        TagDtoResponse actualDto = tagService.update(id, updateRequest);
 
         assertEquals(expectedDto, actualDto);
         verify(tagRepository).findById(id);
@@ -162,12 +161,11 @@ class TagServiceImplTest {
     void update_shouldThrowNotFoundException_whenTagDoesNotExist() {
         Long id = 1L;
         TagDtoRequest updateRequest = new TagDtoRequest();
-        updateRequest.setId(id);
 
         when(tagRepository.findById(id)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> tagService.update(updateRequest));
+                () -> tagService.update(id, updateRequest));
 
         assertEquals(String.format(TAG_DOES_NOT_EXIST.getErrorMessage(), id), exception.getMessage());
         verify(tagRepository).findById(id);
@@ -181,7 +179,6 @@ class TagServiceImplTest {
         String newName = "Updated Name";
 
         TagDtoRequest patchRequest = new TagDtoRequest();
-        patchRequest.setId(id);
         patchRequest.setName(newName);
 
         Tag prevTag = new Tag("Old Name");
@@ -194,7 +191,7 @@ class TagServiceImplTest {
         when(tagRepository.save(prevTag)).thenReturn(savedTag);
         when(tagDtoMapper.modelToDto(savedTag)).thenReturn(expectedDto);
 
-        TagDtoResponse actualDto = tagService.patch(patchRequest);
+        TagDtoResponse actualDto = tagService.patch(id, patchRequest);
 
         assertEquals(expectedDto, actualDto);
         assertEquals(newName, prevTag.getName());
@@ -213,7 +210,6 @@ class TagServiceImplTest {
         existingTag.setId(id);
 
         TagDtoRequest patchRequest = new TagDtoRequest();
-        patchRequest.setId(id);
 
         TagDtoResponse expectedResponse = new TagDtoResponse(id, originalName);
 
@@ -221,7 +217,7 @@ class TagServiceImplTest {
         when(tagRepository.save(existingTag)).thenReturn(existingTag);
         when(tagDtoMapper.modelToDto(existingTag)).thenReturn(expectedResponse);
 
-        TagDtoResponse actualResponse = tagService.patch(patchRequest);
+        TagDtoResponse actualResponse = tagService.patch(id, patchRequest);
 
         assertEquals(expectedResponse, actualResponse);
         assertEquals(originalName, existingTag.getName());
@@ -234,12 +230,11 @@ class TagServiceImplTest {
     void patch_shouldThrowNotFoundException_whenTagDoesNotExist() {
         Long id = 99L;
         TagDtoRequest patchRequest = new TagDtoRequest();
-        patchRequest.setId(id);
 
         when(tagRepository.findById(id)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> tagService.patch(patchRequest));
+                () -> tagService.patch(id, patchRequest));
 
         assertEquals(String.format(TAG_DOES_NOT_EXIST.getErrorMessage(), id), exception.getMessage());
 

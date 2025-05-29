@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.stream.Stream;
 
@@ -40,7 +39,7 @@ public class ValidationAspect {
 
     @Before(value = "validAnnotation()")
     public void validateBeforeExecuting(JoinPoint joinPoint) throws NoSuchMethodException {
-        LOGGER.info("Validating args {}", Arrays.toString(joinPoint.getArgs()));
+        LOGGER.info("Validating args");
         if (joinPoint.getSignature() instanceof MethodSignature signature) {
             Method targetMethod = getTargetMethod(joinPoint, signature);
             var args = joinPoint.getArgs();
@@ -52,8 +51,8 @@ public class ValidationAspect {
                 }
             }
             if (!violations.isEmpty()) {
-                LOGGER.error("Validation failed {}", violations);
-                throw new ValidationException(String.format(VALIDATION_EXCEPTION.getErrorMessage(), violations));
+                LOGGER.error("Validation failed: {}", violations);
+                throw new ValidationException(String.format(VALIDATION_EXCEPTION.getErrorMessage(), violations.stream().findFirst().get().message()));
             }
         }
     }

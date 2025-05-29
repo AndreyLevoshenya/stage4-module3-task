@@ -1,4 +1,4 @@
-package com.mjc.school.impl;
+package com.mjc.school.service.impl;
 
 import com.mjc.school.dto.CommentDtoRequest;
 import com.mjc.school.dto.CommentDtoResponse;
@@ -126,7 +126,7 @@ class CommentServiceImplTest {
     void create_shouldSaveAndReturnCommentDto() {
         Long id = 1L;
         LocalDateTime date = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
-        CommentDtoRequest createRequest = new CommentDtoRequest(id, "Content", id);
+        CommentDtoRequest createRequest = new CommentDtoRequest("Content", id);
         Comment model = new Comment("Content", new News(), date, date);
         model.getNews().setId(id);
         Comment savedComment = new Comment("Content", new News(), date, date);
@@ -169,7 +169,6 @@ class CommentServiceImplTest {
         LocalDateTime date = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 
         CommentDtoRequest updateRequest = new CommentDtoRequest();
-        updateRequest.setId(id);
         updateRequest.setContent("Content");
 
         Comment comment = new Comment("Content", null, date, date);
@@ -182,7 +181,7 @@ class CommentServiceImplTest {
         when(commentRepository.save(comment)).thenReturn(savedComment);
         when(commentDtoMapper.modelToDto(savedComment, newsDtoMapper)).thenReturn(expectedDto);
 
-        CommentDtoResponse actualDto = commentService.update(updateRequest);
+        CommentDtoResponse actualDto = commentService.update(id, updateRequest);
 
         assertEquals(expectedDto, actualDto);
         verify(commentRepository).findById(id);
@@ -194,12 +193,11 @@ class CommentServiceImplTest {
     void update_shouldThrowNotFoundException_whenCommentDoesNotExist() {
         Long id = 1L;
         CommentDtoRequest updateRequest = new CommentDtoRequest();
-        updateRequest.setId(id);
 
         when(commentRepository.findById(id)).thenReturn(Optional.empty());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> commentService.update(updateRequest));
+                () -> commentService.update(id, updateRequest));
 
         assertEquals(String.format(COMMENT_DOES_NOT_EXIST.getErrorMessage(), id), exception.getMessage());
         verify(commentRepository).findById(id);
@@ -214,7 +212,6 @@ class CommentServiceImplTest {
         LocalDateTime date = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 
         CommentDtoRequest patchRequest = new CommentDtoRequest();
-        patchRequest.setId(id);
         patchRequest.setContent(newContent);
 
         Comment prevComment = new Comment("Old content", null, date, date);
@@ -227,7 +224,7 @@ class CommentServiceImplTest {
         when(commentRepository.save(prevComment)).thenReturn(savedComment);
         when(commentDtoMapper.modelToDto(savedComment, newsDtoMapper)).thenReturn(expectedDto);
 
-        CommentDtoResponse actualDto = commentService.patch(patchRequest);
+        CommentDtoResponse actualDto = commentService.patch(id, patchRequest);
 
         assertEquals(expectedDto, actualDto);
         assertEquals(newContent, prevComment.getContent());
@@ -247,7 +244,7 @@ class CommentServiceImplTest {
         Comment existingComment = new Comment(originalContent, null, dateTime, dateTime);
         existingComment.setId(id);
 
-        CommentDtoRequest patchRequest = new CommentDtoRequest(id, null, null);
+        CommentDtoRequest patchRequest = new CommentDtoRequest(null, null);
 
         CommentDtoResponse expectedResponse = new CommentDtoResponse(id, originalContent, null, dateTime, dateTime);
 
@@ -256,7 +253,7 @@ class CommentServiceImplTest {
         when(commentDtoMapper.modelToDto(existingComment, newsDtoMapper)).thenReturn(expectedResponse);
 
         // when
-        CommentDtoResponse actualResponse = commentService.patch(patchRequest);
+        CommentDtoResponse actualResponse = commentService.patch(id, patchRequest);
 
         // then
         assertEquals(expectedResponse, actualResponse);
@@ -270,11 +267,10 @@ class CommentServiceImplTest {
     void patch_shouldThrowNotFoundException_whenCommentDoesNotExist() {
         Long id = 99L;
         CommentDtoRequest patchRequest = new CommentDtoRequest();
-        patchRequest.setId(id);
 
         when(commentRepository.findById(id)).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> commentService.patch(patchRequest));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> commentService.patch(id, patchRequest));
 
         assertEquals(String.format(COMMENT_DOES_NOT_EXIST.getErrorMessage(), id), exception.getMessage());
 

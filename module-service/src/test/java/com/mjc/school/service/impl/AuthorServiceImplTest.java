@@ -1,4 +1,4 @@
-package com.mjc.school.impl;
+package com.mjc.school.service.impl;
 
 import com.mjc.school.dto.AuthorDtoRequest;
 import com.mjc.school.dto.AuthorDtoResponse;
@@ -149,7 +149,7 @@ class AuthorServiceImplTest {
     @Test
     void shouldCreateAuthorSuccessfully() {
         // given
-        AuthorDtoRequest request = new AuthorDtoRequest(null, "John Doe");
+        AuthorDtoRequest request = new AuthorDtoRequest("John Doe");
         LocalDateTime dateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         Author model = new Author("John Doe", dateTime, dateTime, null);
         Author saved = new Author("John Doe", dateTime, dateTime, new ArrayList<>());
@@ -175,25 +175,25 @@ class AuthorServiceImplTest {
     @Test
     void update_shouldReturnUpdatedAuthor_whenAuthorExists() {
         // given
-        AuthorDtoRequest updateRequest = new AuthorDtoRequest(null, "Updated name");
+        AuthorDtoRequest updateRequest = new AuthorDtoRequest("Updated name");
         LocalDateTime dateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
         Author model = new Author("Updated name", dateTime, dateTime, null);
         Author saved = new Author("Updated name", dateTime, dateTime, new ArrayList<>());
         saved.setId(1L);
         AuthorDtoResponse response = new AuthorDtoResponse(1L, "Updated name", dateTime, dateTime);
 
-        when(authorRepository.findById(updateRequest.getId())).thenReturn(Optional.of(model));
+        when(authorRepository.findById(1L)).thenReturn(Optional.of(model));
         when(authorRepository.save(model)).thenReturn(saved);
         when(authorDtoMapper.modelToDto(saved)).thenReturn(response);
 
         // when
-        AuthorDtoResponse result = authorService.update(updateRequest);
+        AuthorDtoResponse result = authorService.update(1L, updateRequest);
 
         // then
         assertNotNull(result);
         assertEquals(response, result);
 
-        verify(authorRepository).findById(updateRequest.getId());
+        verify(authorRepository).findById(1L);
         verify(authorRepository).save(model);
         verify(authorDtoMapper).modelToDto(saved);
     }
@@ -201,18 +201,18 @@ class AuthorServiceImplTest {
     @Test
     void update_shouldThrowNotFoundException_whenAuthorDoesNotExist() {
         // given
-        AuthorDtoRequest updateRequest = new AuthorDtoRequest(42L, "Name");
+        AuthorDtoRequest updateRequest = new AuthorDtoRequest("Name");
 
-        when(authorRepository.findById(updateRequest.getId())).thenReturn(Optional.empty());
+        when(authorRepository.findById(42L)).thenReturn(Optional.empty());
 
         // when
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> authorService.update(updateRequest));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> authorService.update(42L, updateRequest));
 
         // then
-        assertEquals(String.format(AUTHOR_DOES_NOT_EXIST.getErrorMessage(), updateRequest.getId()),
+        assertEquals(String.format(AUTHOR_DOES_NOT_EXIST.getErrorMessage(), 42L),
                 exception.getMessage());
 
-        verify(authorRepository).findById(updateRequest.getId());
+        verify(authorRepository).findById(42L);
         verifyNoMoreInteractions(authorDtoMapper, authorRepository);
     }
 
@@ -229,7 +229,7 @@ class AuthorServiceImplTest {
         Author updatedAuthor = new Author(newName, dateTime, dateTime, null);
         updatedAuthor.setId(id);
 
-        AuthorDtoRequest patchRequest = new AuthorDtoRequest(id, newName);
+        AuthorDtoRequest patchRequest = new AuthorDtoRequest(newName);
         AuthorDtoResponse expectedResponse = new AuthorDtoResponse(id, newName, dateTime, dateTime);
 
         when(authorRepository.findById(id)).thenReturn(Optional.of(existingAuthor));
@@ -237,7 +237,7 @@ class AuthorServiceImplTest {
         when(authorDtoMapper.modelToDto(updatedAuthor)).thenReturn(expectedResponse);
 
         // when
-        AuthorDtoResponse actualResponse = authorService.patch(patchRequest);
+        AuthorDtoResponse actualResponse = authorService.patch(id, patchRequest);
 
         // then
         assertEquals(expectedResponse, actualResponse);
@@ -258,7 +258,7 @@ class AuthorServiceImplTest {
         Author existingAuthor = new Author(originalName, dateTime, dateTime, null);
         existingAuthor.setId(id);
 
-        AuthorDtoRequest patchRequest = new AuthorDtoRequest(id, null);
+        AuthorDtoRequest patchRequest = new AuthorDtoRequest(null);
 
         AuthorDtoResponse expectedResponse = new AuthorDtoResponse(id, originalName, dateTime, dateTime);
 
@@ -267,7 +267,7 @@ class AuthorServiceImplTest {
         when(authorDtoMapper.modelToDto(existingAuthor)).thenReturn(expectedResponse);
 
         // when
-        AuthorDtoResponse actualResponse = authorService.patch(patchRequest);
+        AuthorDtoResponse actualResponse = authorService.patch(id, patchRequest);
 
         // then
         assertEquals(expectedResponse, actualResponse);
@@ -281,12 +281,12 @@ class AuthorServiceImplTest {
     void patch_shouldThrowNotFoundException_whenAuthorDoesNotExist() {
         // given
         Long id = 42L;
-        AuthorDtoRequest patchRequest = new AuthorDtoRequest(id, "Name");
+        AuthorDtoRequest patchRequest = new AuthorDtoRequest("Name");
 
         when(authorRepository.findById(id)).thenReturn(Optional.empty());
 
         // when
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> authorService.patch(patchRequest));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> authorService.patch(id, patchRequest));
 
         // then
         assertEquals(String.format(AUTHOR_DOES_NOT_EXIST.getErrorMessage(), id), exception.getMessage());
