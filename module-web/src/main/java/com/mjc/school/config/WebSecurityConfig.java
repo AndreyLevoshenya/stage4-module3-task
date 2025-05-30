@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -20,7 +19,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.Arrays;
@@ -36,14 +34,16 @@ public class WebSecurityConfig {
     private final UserDetailsService userDetailsService;
     private final Oauth2LoginSuccessHandler oauth2LoginSuccessHandler;
     private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
     private final Environment env;
 
     @Autowired
-    public WebSecurityConfig(JwtAuthenticationFilter jwtAuthFilter, UserDetailsService userDetailsService, Oauth2LoginSuccessHandler oauth2LoginSuccessHandler, CustomAccessDeniedHandler accessDeniedHandler, Environment env) {
+    public WebSecurityConfig(JwtAuthenticationFilter jwtAuthFilter, UserDetailsService userDetailsService, Oauth2LoginSuccessHandler oauth2LoginSuccessHandler, CustomAccessDeniedHandler accessDeniedHandler, CustomAuthenticationEntryPoint authenticationEntryPoint, Environment env) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userDetailsService = userDetailsService;
         this.oauth2LoginSuccessHandler = oauth2LoginSuccessHandler;
         this.accessDeniedHandler = accessDeniedHandler;
+        this.authenticationEntryPoint = authenticationEntryPoint;
         this.env = env;
     }
 
@@ -69,8 +69,8 @@ public class WebSecurityConfig {
                         .anyRequest().hasAuthority(ADMIN)
                 )
                 .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler)
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2Login(oauth2 -> oauth2

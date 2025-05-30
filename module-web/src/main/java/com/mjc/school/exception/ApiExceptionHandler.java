@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import static com.mjc.school.exception.ExceptionErrorCodes.API_VERSION_NOT_SUPPORTED;
+import static com.mjc.school.exception.ExceptionErrorCodes.ENTITY_ALREADY_EXISTS;
+import static com.mjc.school.exception.ExceptionErrorCodes.METHOD_ARGUMENT_TYPE_MISMATCH_EXCEPTION;
 import static com.mjc.school.exception.ExceptionErrorCodes.RESOURCE_NOT_FOUND;
 import static com.mjc.school.exception.ExceptionErrorCodes.VALIDATION_EXCEPTION;
 
