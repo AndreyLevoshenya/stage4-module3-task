@@ -1,0 +1,126 @@
+services:
+  app1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    expose:
+      - "8443"
+    environment:
+      SERVER_ADDRESS: 0.0.0.0
+      SERVER_PORT: 8443
+      CLIENT_ID: ${CLIENT_ID}
+      CLIENT_SECRET: ${CLIENT_SECRET}
+      DB_URL: ${DB_URL}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      KEY_STORE_PATH: ${KEY_STORE_PATH}
+      KEY_STORE_PASSWORD: KEY_STORE_PASSWORD
+      KEY_ALIAS: ${KEY_ALIAS}
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  app2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    expose:
+      - "8443"
+    environment:
+      SERVER_ADDRESS: 0.0.0.0
+      SERVER_PORT: 8443
+      CLIENT_ID: ${CLIENT_ID}
+      CLIENT_SECRET: ${CLIENT_SECRET}
+      DB_URL: ${DB_URL}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      KEY_STORE_PATH: ${KEY_STORE_PATH}
+      KEY_STORE_PASSWORD: KEY_STORE_PASSWORD
+      KEY_ALIAS: ${KEY_ALIAS}
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  app3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    expose:
+      - "8443"
+    environment:
+      SERVER_ADDRESS: 0.0.0.0
+      SERVER_PORT: 8443
+      CLIENT_ID: ${CLIENT_ID}
+      CLIENT_SECRET: ${CLIENT_SECRET}
+      DB_URL: ${DB_URL}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      KEY_STORE_PATH: ${KEY_STORE_PATH}
+      KEY_STORE_PASSWORD: KEY_STORE_PASSWORD
+      KEY_ALIAS: ${KEY_ALIAS}
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgData:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+
+  sonarqube:
+    image: sonarqube:latest
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://db:5432/sonarqube-db
+      SONAR_JDBC_USERNAME: ${DB_USER}
+      SONAR_JDBC_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  redis:
+    image: redis:8.0-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisData:/data
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - app1
+      - app2
+      - app3
+    networks:
+      - app-network
+
+volumes:
+  pgData:
+  redisData:
+
+networks:
+  app-network:
+    driver: bridge

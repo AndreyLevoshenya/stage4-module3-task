@@ -4,12 +4,39 @@ import com.mjc.school.model.News;
 import com.mjc.school.model.SearchParameters;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface NewsRepository extends JpaRepository<News, Long>, JpaSpecificationExecutor<News> {
+    @Override
+    @NonNull
+    @EntityGraph(attributePaths = {"news", "comments"})
+    List<News> findAll();
+
+    @Override
+    @NonNull
+    @EntityGraph(attributePaths = {"author", "comments"})
+    Page<News> findAll(@NonNull Pageable pageable);
+
+    @Override
+    @NonNull
+    @EntityGraph(attributePaths = {"author", "comments"})
+    Page<News> findAll(Specification<News> spec, @NonNull Pageable pageable);
+
+    @Override
+    @NonNull
+    @EntityGraph(attributePaths = {"author", "comments"})
+    Optional<News> findById(@NonNull Long id);
+
+    @EntityGraph(attributePaths = {"author", "tags"})
     @Query("""
                 SELECT n FROM News n
                 LEFT JOIN n.author a

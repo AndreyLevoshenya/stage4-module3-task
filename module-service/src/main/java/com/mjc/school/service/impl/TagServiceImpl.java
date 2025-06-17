@@ -35,7 +35,6 @@ public class TagServiceImpl implements TagService {
 
     private final TagDtoMapper tagDtoMapper;
 
-
     @Autowired
     public TagServiceImpl(TagRepository tagRepository, NewsRepository newsRepository, TagDtoMapper tagDtoMapper) {
         this.tagRepository = tagRepository;
